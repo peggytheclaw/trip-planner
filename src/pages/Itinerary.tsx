@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Share2, DollarSign, Settings, Plus, Check,
-  Copy, X, Eye, Map, Package,
+  Copy, X, Eye, Map,
 } from 'lucide-react';
 import { useTripStore } from '../store/tripStore';
 import { groupEventsByDay, getActiveHotel, detectMealGap } from '../utils/itineraryUtils';
