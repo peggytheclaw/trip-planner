@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowLeft, Share2, DollarSign, Settings, Plus, Check
+  ArrowLeft, Share2, DollarSign, Settings, Plus, Check, Copy, X, Eye
 } from 'lucide-react';
 import { useTripStore } from '../store/tripStore';
 import { groupEventsByDay, getActiveHotel, detectMealGap } from '../utils/itineraryUtils';
@@ -23,6 +23,7 @@ export default function Itinerary() {
   const [editEvent, setEditEvent] = useState<TripEvent | null>(null);
   const [insertDate, setInsertDate] = useState<string | undefined>();
   const [linkCopied, setLinkCopied] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
 
   useEffect(() => {
     if (trip) setCurrentTrip(trip.id);
@@ -38,7 +39,8 @@ export default function Itinerary() {
   }
 
   const dayGroups = groupEventsByDay(trip.events);
-  const shareUrl = `${window.location.origin}/trip/${trip.id}`;
+  const shareUrl = `${window.location.origin}/trip/${trip.id}/share`;
+  const editUrl = `${window.location.origin}/trip/${trip.id}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -96,11 +98,11 @@ export default function Itinerary() {
                 </button>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={handleCopyLink}
+                    onClick={() => setShareModalOpen(true)}
                     className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full"
                   >
-                    {linkCopied ? <Check size={12} /> : <Share2 size={12} />}
-                    {linkCopied ? 'Copied!' : 'Share'}
+                    <Share2 size={12} />
+                    Share
                   </button>
                   <button
                     onClick={() => navigate(`/trip/${trip.id}/expenses`)}
@@ -269,6 +271,129 @@ export default function Itinerary() {
         editEvent={editEvent}
         travelers={trip.travelers}
       />
+
+      {/* Share Modal */}
+      <AnimatePresence>
+        {shareModalOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+              onClick={() => setShareModalOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+            <motion.div
+              className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            >
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full bg-gray-200" />
+              </div>
+              <div className="px-5 pt-3 pb-8">
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h2 className="text-xl font-black text-gray-900">Share Trip</h2>
+                    <p className="text-sm text-gray-400 mt-0.5">Anyone with these links can view or edit</p>
+                  </div>
+                  <button
+                    onClick={() => setShareModalOpen(false)}
+                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                {/* Public view link */}
+                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-4 mb-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Eye size={15} className="text-blue-400" />
+                    <span className="text-white font-semibold text-sm">Public View</span>
+                    <span className="ml-auto text-xs bg-blue-500/30 text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                      Read-only
+                    </span>
+                  </div>
+                  <p className="text-slate-400 text-xs mb-3 leading-relaxed">
+                    A beautiful travel-magazine-style view. Share with family and friends — no account needed.
+                  </p>
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-white/10 rounded-xl px-3 py-2 text-xs text-slate-300 font-mono truncate">
+                      {shareUrl}
+                    </div>
+                    <button
+                      onClick={() => {
+                        handleCopyLink();
+                      }}
+                      className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl transition-all ${
+                        linkCopied
+                          ? 'bg-green-500 text-white'
+                          : 'bg-white text-gray-900 hover:bg-gray-100'
+                      }`}
+                    >
+                      {linkCopied ? <Check size={12} /> : <Copy size={12} />}
+                      {linkCopied ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => { setShareModalOpen(false); navigate(`/trip/${trip.id}/share`); }}
+                    className="mt-2 w-full text-center text-xs text-blue-400 hover:text-blue-300 py-1"
+                  >
+                    Preview public view →
+                  </button>
+                </div>
+
+                {/* Collab link */}
+                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Share2 size={15} className="text-green-600" />
+                    <span className="text-gray-900 font-semibold text-sm">Collaboration Link</span>
+                    <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                      Can edit
+                    </span>
+                  </div>
+                  <p className="text-gray-400 text-xs mb-3 leading-relaxed">
+                    Real-time peer-to-peer sync via WebRTC. Co-travelers can add and edit events together.
+                  </p>
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-white rounded-xl px-3 py-2 text-xs text-gray-500 font-mono truncate border border-gray-200">
+                      {editUrl}
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(editUrl);
+                      }}
+                      className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all"
+                    >
+                      <Copy size={12} />
+                      Copy
+                    </button>
+                  </div>
+                </div>
+
+                {/* Native share */}
+                {'share' in navigator && (
+                  <button
+                    onClick={async () => {
+                      await navigator.share({
+                        title: `${trip.name} — ${trip.destination}`,
+                        text: `Check out my trip itinerary!`,
+                        url: shareUrl,
+                      });
+                    }}
+                    className="mt-3 w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-3.5 rounded-2xl font-semibold"
+                  >
+                    <Share2 size={16} />
+                    Share via…
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

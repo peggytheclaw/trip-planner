@@ -29,7 +29,7 @@ export default function TripSettings() {
 
   if (!trip) return <div className="p-8 text-center">Trip not found</div>;
 
-  const shareUrl = `${window.location.origin}/trip/${trip.id}`;
+  const shareUrl = `${window.location.origin}/trip/${trip.id}/share`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
