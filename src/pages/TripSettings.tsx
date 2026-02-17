@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Plus, Trash2, Copy, Check, Link2 } from 'lucide-react';
 import { useTripStore } from '../store/tripStore';
-import { Traveler } from '../types';
+import PackList from '../components/PackList';
 
 const AVATAR_COLORS = [
   '#3B82F6', '#10B981', '#F97316', '#8B5CF6', '#EF4444',
@@ -249,6 +249,11 @@ export default function TripSettings() {
           </div>
         </section>
 
+        {/* Pack List */}
+        <section className="bg-white rounded-2xl border border-gray-100 p-5">
+          <PackList tripId={trip.id} />
+        </section>
+
         {/* Danger zone */}
         <section className="bg-white rounded-2xl border border-red-100 p-5">
           <h2 className="font-semibold text-red-600 mb-2">Danger Zone</h2>
@@ -257,7 +262,7 @@ export default function TripSettings() {
             onClick={() => {
               if (confirm('Delete this trip and all its data? This cannot be undone.')) {
                 useTripStore.getState().deleteTrip(trip.id);
-                navigate('/');
+                navigate('/app');
               }
             }}
             className="text-sm text-red-500 font-medium border border-red-200 px-4 py-2 rounded-xl hover:bg-red-50 transition-colors"

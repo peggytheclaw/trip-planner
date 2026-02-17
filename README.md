@@ -1,74 +1,85 @@
 # ✈️ Wanderplan — Collaborative Trip Planning
 
-> Plan trips together with friends. Real-time peer-to-peer sync, expense splitting, and beautiful itineraries.
+> Plan trips together with friends. Real-time peer-to-peer sync, expense splitting, beautiful sharing, and a community discovery feed.
 
-![Wanderplan Screenshot](https://via.placeholder.com/800x400/667eea/ffffff?text=Wanderplan+%E2%9C%88%EF%B8%8F)
+**Built to launch.** Not just a portfolio demo — a real product ready for Product Hunt.
+
+---
+
+## 🌐 Routes
+
+| Route | Description |
+|---|---|
+| `/` | **Landing page** — marketing, waitlist, social proof |
+| `/app` | **Trip list** — your trips + templates |
+| `/discover` | **Community feed** — browse & fork shared itineraries |
+| `/trip/:id` | **Itinerary** — live timeline editor |
+| `/trip/:id/share` | **Public view** — shareable travel magazine page |
+| `/trip/:id/expenses` | **Expenses** — splitwise-style tracking |
+| `/trip/:id/settings` | **Settings** — travelers, pack list, share link |
 
 ---
 
 ## ✨ Features
 
-### 🗓️ Beautiful Itinerary Timeline
-- Vertical timeline view with cards for every event type
-- **7 event types:** Flights, Hotels, Restaurants, Activities, Transport, Trains, Notes
-- Each type has a distinct color-coded card with a left border accent
-- Day separator headers with smart contextual indicators:
-  - 🍽️ Meal gap nudges (yellow banner when no lunch/dinner planned)
-  - 🌙 Overnight hotel stay indicators between days
-  - Travel time connectors between events
-- Add events anywhere in the timeline with the `+` button
-- Edit or delete any event inline
+### 🏠 Landing Page
+- Animated phone mockup showing the app in action
+- Email waitlist capture (localStorage-backed, seeds at 847 for social proof)
+- "How it works" 3-step explainer
+- Feature grid, testimonials, discover preview
+- Final CTA with "skip the waitlist — try it now" escape hatch
+
+### 🗓️ Itinerary Timeline
+- Vertical timeline with 7 event types: Flights, Hotels, Restaurants, Activities, Transport, Trains, Notes
+- Color-coded cards with left border accents
+- Day separators, meal gap nudges (🍽️ yellow banner), hotel overnight indicators (🌙)
+- Add events anywhere with inline + buttons
+- Full-screen Share modal with public-view vs. collab-link
+
+### 🌍 Discover Feed
+- 8 seeded community trips spanning Tokyo, NYC, Europe, Bali, Patagonia, Morocco, Iceland, Thailand
+- Search, tag filter (Asia / Europe / Budget / Adventure / etc.), sort by Trending / Most Saved / Newest
+- One-tap **fork** — instantly creates a copy in your trip list
+
+### ⚡ Trip Templates
+- 4 fully-built starter trips: Tokyo 8d, NYC Weekend 3d, Euro Backpacking 10d, Bali Retreat 7d
+- Each template has real events with booking tips, prices, and timing
+- "Use template" forks a copy you can customize
 
 ### 🤝 Real-Time Collaboration (Yjs + WebRTC)
-- **Zero-server P2P sync** — peers connect directly via WebRTC signaling
-- Share a link and friends join the same live Yjs document instantly
-- Connected users shown as colored avatar dots (Notion/Figma-style)
-- Each trip's ID is its Yjs room ID — no backend required
-- Graceful offline fallback if WebRTC is unavailable
+- Zero-server P2P sync via `y-webrtc`
+- Share one link — friends join the same live Yjs document
+- Connected users shown as colored avatar dots
+- Graceful offline fallback
 
-### 💰 Expense Splitting (Splitwise-style)
-- Add expenses with payer, split between travelers, and category
-- **Settle Up tab** uses a debt-minimization algorithm to find the fewest transactions
-- **Summary tab** shows category breakdown with animated progress bars
-- Per-person balance tracking (paid vs. fair share)
-- Mark settlements as paid with one tap
+### 💰 Expense Splitting
+- Track expenses with payer + split between travelers
+- Debt-minimization algorithm (greedy, minimizes transaction count)
+- Settle Up tab, category breakdown, per-person totals
 
-### 📱 Mobile-First Design
-- Designed for phones, works beautifully on desktop
-- Bottom sheet modals for adding/editing (native mobile feel)
-- Safe area insets for notched devices
-- Touch-optimized tap targets throughout
+### 🎒 Pack List
+- Checklist per trip with quick-add essentials (passport, charger, etc.)
+- Progress bar, "clear packed" button
+- Lives on the Trip Settings page
 
-### 🗺️ Sample Demo Trip
-Pre-loaded with a full **Tokyo Adventure 🇯🇵** trip (8 days, 17+ events, 4 travelers, 8 expenses):
-- Outbound + return United Airlines flights (SFO ↔ NRT)
-- 5 nights at Park Hyatt Tokyo (check-in + checkout events)
-- Narita Express train, Tokyo Metro subway
-- Restaurants: Ichiran Ramen, Tsukiji Market, Sukiyabashi Jiro, Gonpachi
-- Activities: Senso-ji, teamLab Planets, Shibuya Crossing, Tokyo Skytree, Akihabara
-- Notes with tips and packing reminders
-- ~$9,500 total expenses tracked and split between Alex, Jordan, Sam & Taylor
+### 📖 Public Share View
+- Magazine/editorial layout: full-bleed hero, day sections, reading progress bar
+- 7 editorial card designs (flights with big IATA codes, etc.)
+- Growth-hack footer: "Made with Wanderplan" + "Start Planning Free" CTA
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ```bash
-# Clone the repo
 git clone https://github.com/peggytheclaw/trip-planner.git
 cd trip-planner
-
-# Install dependencies
 npm install
-
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
+npm run dev          # → http://localhost:5173
+npm run build        # Production build
 ```
 
-The app opens at `http://localhost:5173` — the Tokyo demo trip is pre-loaded.
+The app loads with a full Tokyo demo trip. Hit `/` for the landing page.
 
 ---
 
@@ -77,15 +88,14 @@ The app opens at `http://localhost:5173` — the Tokyo demo trip is pre-loaded.
 | Technology | Purpose |
 |---|---|
 | React 18 + TypeScript | UI framework |
-| Vite | Build tool |
-| Tailwind CSS v4 | Styling (mobile-first) |
-| Zustand | State management |
-| React Router v6 | Navigation |
-| Framer Motion | Card animations |
+| Vite + manual chunking | Build tool, optimized bundle |
+| Tailwind CSS v4 | Mobile-first styling |
+| Zustand + persist | State + localStorage |
+| React Router v6 | 8-route navigation |
+| Framer Motion | Animations, whileInView |
 | date-fns | Date formatting |
 | Lucide React | Icons |
-| **Yjs + y-webrtc** | **Real-time P2P collaboration** |
-| localStorage | Persistence |
+| **Yjs + y-webrtc** | **P2P real-time collaboration** |
 
 ---
 
@@ -93,83 +103,52 @@ The app opens at `http://localhost:5173` — the Tokyo demo trip is pre-loaded.
 
 ```
 src/
-├── components/
-│   ├── EventCard.tsx         # Renders all 7 event card types
-│   ├── DayDivider.tsx        # Day separator with hotel stay indicator
-│   ├── BetweenIndicator.tsx  # Meal nudges, travel times, add button
-│   ├── AddEventSheet.tsx     # Bottom sheet form (type-aware fields)
-│   ├── CollabAvatars.tsx     # Connected peers display
-│   └── ExpenseItem.tsx       # Single expense row
 ├── pages/
-│   ├── TripList.tsx          # Home — trip card list
-│   ├── Itinerary.tsx         # Main timeline view ⭐
-│   ├── Expenses.tsx          # Expenses, settle up, summary
-│   └── TripSettings.tsx      # Travelers, trip details, share link
-├── store/
-│   ├── tripStore.ts          # Zustand store — trips + events
-│   ├── expenseStore.ts       # Zustand store — expenses + settlements
-│   └── collaborationStore.ts # Collab connection state
+│   ├── Landing.tsx        ← Marketing page + waitlist
+│   ├── TripList.tsx       ← /app — trips + templates tabs
+│   ├── Discover.tsx       ← Community feed + search
+│   ├── Itinerary.tsx      ← Main timeline editor ⭐
+│   ├── ShareView.tsx      ← Public travel magazine view
+│   ├── Expenses.tsx       ← Splitwise-style tracker
+│   ├── TripSettings.tsx   ← Travelers, pack list, share
+│   └── EventDetail.tsx    ← Single event deep-dive
+├── components/
+│   ├── EventCard.tsx      ← 7 event card types
+│   ├── AddEventSheet.tsx  ← Bottom sheet event form
+│   ├── PackList.tsx       ← Trip checklist
+│   ├── CollabAvatars.tsx  ← Live presence indicator
+│   ├── DayDivider.tsx     ← Timeline day separators
+│   ├── BetweenIndicator.tsx ← Meal nudges
+│   └── ExpenseItem.tsx    ← Expense row
 ├── data/
-│   └── sampleTrip.ts         # Tokyo demo trip + expenses
+│   ├── sampleTrip.ts      ← Tokyo demo (17 events, 8 expenses)
+│   └── templates.ts       ← NYC, Euro, Bali templates
+├── store/
+│   ├── tripStore.ts       ← Trips + events
+│   ├── expenseStore.ts    ← Expenses + settlements
+│   ├── collaborationStore.ts
+│   └── waitlistStore.ts   ← Email waitlist
 ├── utils/
-│   ├── itineraryUtils.ts     # Day grouping, meal gap detection, colors
-│   ├── expenseCalculator.ts  # Debt minimization algorithm
-│   └── collaboration.ts      # Yjs + y-webrtc setup
-└── types/
-    └── index.ts              # All TypeScript types
+│   ├── itineraryUtils.ts  ← Grouping, meal gaps, colors
+│   ├── expenseCalculator.ts ← Debt minimization
+│   └── collaboration.ts   ← Yjs setup
+└── types/index.ts         ← All TypeScript types
 ```
 
 ---
 
-## 🤝 Collaboration — How It Works
+## 🔮 What's next (post-launch)
 
-Wanderplan uses **Yjs** (a CRDT library) with **y-webrtc** for peer-to-peer real-time sync:
-
-1. **Each trip has a UUID** that doubles as the Yjs room ID
-2. When you click "Share" and someone opens your link, they connect to the same Yjs document
-3. **WebRTC signaling** via `wss://signaling.yjs.dev` brokers the initial handshake
-4. After connecting, all data flows **directly peer-to-peer** — no server stores your trip data
-5. **CRDTs** ensure conflict-free merging when multiple people edit simultaneously
-6. If WebRTC is unavailable (firewall, etc.), the app degrades gracefully to offline mode
-
-```
-Alice's Browser ←──── WebRTC P2P ────→ Bob's Browser
-        ↕                                      ↕
-   Yjs Doc                                Yjs Doc
-  (CRDT)                                  (CRDT)
-        ↕                                      ↕
- localStorage                          localStorage
-```
-
----
-
-## 💡 Expense Settle-Up Algorithm
-
-The debt minimization uses a **greedy algorithm** to minimize the number of transactions:
-
-1. Calculate each person's net balance (total paid − fair share)
-2. Split into creditors (net positive) and debtors (net negative)
-3. Greedily match largest creditor with largest debtor
-4. One transaction eliminates at least one person's debt
-5. Repeat until all balanced
-
-For 4 people, this reduces up to 6 potential transactions to as few as 3.
-
----
-
-## 🎨 Design System
-
-| Event Type | Color | Border |
-|---|---|---|
-| ✈️ Flight | `#3B82F6` | Blue |
-| 🏨 Hotel | `#8B5CF6` | Purple |
-| 🍽️ Restaurant | `#F97316` | Orange |
-| 🎯 Activity | `#10B981` | Green |
-| 🚗/🚂 Transport | `#EAB308` | Yellow |
-| 📝 Note | `#6B7280` | Gray |
+- [ ] Deploy to Vercel/Netlify with a real domain
+- [ ] Supabase backend for persistent trips (upgrade from localStorage)
+- [ ] Real-time signaling server for better WebRTC reliability
+- [ ] Google Calendar export
+- [ ] PDF export of itinerary
+- [ ] AI trip suggestions ("fill in my Tokyo week")
+- [ ] Mobile app (Capacitor or React Native)
 
 ---
 
 ## 📄 License
 
-MIT — built as a portfolio project.
+MIT

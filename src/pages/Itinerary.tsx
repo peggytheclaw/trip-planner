@@ -12,6 +12,7 @@ import DayDivider from '../components/DayDivider';
 import BetweenIndicator from '../components/BetweenIndicator';
 import AddEventSheet from '../components/AddEventSheet';
 import CollabAvatars from '../components/CollabAvatars';
+import TripHeroMap from '../components/TripHeroMap';
 
 export default function Itinerary() {
   const { tripId } = useParams<{ tripId: string }>();
@@ -31,9 +32,17 @@ export default function Itinerary() {
 
   if (!trip) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500">
-        Trip not found.{' '}
-        <button className="text-blue-500 ml-2" onClick={() => navigate('/')}>Go back</button>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
+        <div className="text-center">
+          <p style={{ color: '#6b7280' }}>Trip not found.</p>
+          <button
+            className="mt-2 text-sm"
+            style={{ color: '#10b981' }}
+            onClick={() => navigate('/')}
+          >
+            Go back
+          </button>
+        </div>
       </div>
     );
   }
@@ -77,43 +86,47 @@ export default function Itinerary() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-20">
+    <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
+      {/* ── HEADER ──────────────────────────────────────────────────────── */}
+      <div className="sticky top-0 z-20" style={{ backgroundColor: '#0a0a0a', borderBottom: '1px solid #1a1a1a' }}>
         <div className="max-w-lg mx-auto">
           {/* Trip cover strip */}
           <div
             className="px-4 pt-4 pb-3 relative"
             style={{ background: trip.coverGradient ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
           >
-            <div className="absolute inset-0 bg-black/25" />
+            <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.35)' }} />
             <div className="relative z-10">
               {/* Back + actions row */}
               <div className="flex items-center justify-between mb-2">
                 <button
                   onClick={() => navigate('/')}
-                  className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
                 >
                   <ArrowLeft size={16} />
                 </button>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShareModalOpen(true)}
-                    className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full"
+                    className="flex items-center gap-1.5 text-white text-xs font-medium px-3 py-1.5 rounded-full"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
                   >
                     <Share2 size={12} />
                     Share
                   </button>
                   <button
                     onClick={() => navigate(`/trip/${trip.id}/expenses`)}
-                    className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full"
+                    className="flex items-center gap-1.5 text-white text-xs font-medium px-3 py-1.5 rounded-full"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
                   >
                     <DollarSign size={12} />
                     Expenses
                   </button>
                   <button
                     onClick={() => navigate(`/trip/${trip.id}/settings`)}
-                    className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white"
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white"
+                    style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
                   >
                     <Settings size={14} />
                   </button>
@@ -126,11 +139,10 @@ export default function Itinerary() {
                     {trip.emoji && <span className="text-2xl">{trip.emoji}</span>}
                     <h1 className="text-white font-bold text-xl leading-tight">{trip.name}</h1>
                   </div>
-                  <p className="text-white/75 text-xs mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.7)' }}>
                     {trip.destination} · {trip.travelers.length} traveler{trip.travelers.length !== 1 ? 's' : ''}
                   </p>
                 </div>
-                {/* Collab avatars */}
                 <CollabAvatars
                   connected={false}
                   peers={[]}
@@ -144,16 +156,22 @@ export default function Itinerary() {
         </div>
       </div>
 
-      {/* Timeline */}
+      {/* ── HERO MAP ────────────────────────────────────────────────────── */}
+      <div className="max-w-lg mx-auto">
+        <TripHeroMap events={trip.events} height={280} />
+      </div>
+
+      {/* ── TIMELINE ────────────────────────────────────────────────────── */}
       <div className="max-w-lg mx-auto px-4 py-4 pb-24">
         {dayGroups.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-5xl mb-4">📋</div>
-            <h3 className="font-semibold text-gray-700 mb-1">No events yet</h3>
-            <p className="text-sm text-gray-400 mb-5">Start adding events to build your itinerary</p>
+            <h3 className="font-semibold text-white mb-1">No events yet</h3>
+            <p className="text-sm mb-5" style={{ color: '#6b7280' }}>Start adding events to build your itinerary</p>
             <button
               onClick={() => handleOpenAdd()}
-              className="inline-flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-xl font-medium text-sm"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm text-white transition-all"
+              style={{ backgroundColor: '#10b981' }}
             >
               <Plus size={16} />
               Add First Event
@@ -166,14 +184,15 @@ export default function Itinerary() {
 
             return (
               <div key={day.date}>
-                {/* Day divider */}
+                {/* Day divider with map */}
                 <DayDivider
                   label={day.label}
                   date={day.date}
                   hotelName={dayIdx > 0 ? activeHotel?.hotelName : undefined}
+                  events={day.events}
                 />
 
-                {/* Meal gap nudge at top of day */}
+                {/* Meal gap nudge */}
                 {mealGap.hasMealGap && day.events.length > 0 && (
                   <div className="mb-2">
                     <BetweenIndicator
@@ -186,7 +205,7 @@ export default function Itinerary() {
                 )}
 
                 {/* Events */}
-                <div className="space-y-3">
+                <div className="space-y-0">
                   {day.events.map((event, evtIdx) => (
                     <div key={event.id}>
                       {/* Add between button (before first event) */}
@@ -194,8 +213,8 @@ export default function Itinerary() {
                         <div className="flex justify-center py-1 opacity-0 hover:opacity-100 transition-opacity group">
                           <button
                             onClick={() => handleOpenAdd(day.date)}
-                            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-500 px-3 py-1
-                                       rounded-full hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all"
+                            className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full hover:opacity-80 transition-all"
+                            style={{ color: '#6b7280' }}
                           >
                             <Plus size={12} />
                             Insert event
@@ -203,30 +222,33 @@ export default function Itinerary() {
                         </div>
                       )}
 
-                      <EventCard
-                        event={event}
-                        onEdit={handleEditEvent}
-                        onDelete={handleDeleteEvent}
-                        index={evtIdx + dayIdx * 5}
-                      />
+                      <div className="mb-3">
+                        <EventCard
+                          event={event}
+                          onEdit={handleEditEvent}
+                          onDelete={handleDeleteEvent}
+                          index={evtIdx + dayIdx * 5}
+                        />
+                      </div>
 
-                      {/* Connector / add between */}
+                      {/* Travel time pill + connector between events */}
                       {evtIdx < day.events.length - 1 && (
-                        <div className="flex items-center justify-center py-1 group">
-                          <div className="flex-1 flex items-center justify-center gap-2">
-                            <div className="w-px h-4 bg-gray-200" />
+                        <div className="flex items-center group mb-0">
+                          <div className="flex-1">
+                            <BetweenIndicator
+                              type="travel-time"
+                              fromEvent={event}
+                              toEvent={day.events[evtIdx + 1]}
+                            />
                           </div>
                           <button
                             onClick={() => handleOpenAdd(day.date)}
-                            className="flex items-center gap-1 text-xs text-gray-400 hover:text-blue-500 px-2.5 py-1
-                                       rounded-full hover:bg-blue-50 border border-transparent hover:border-blue-100
+                            className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full mr-1
                                        opacity-0 group-hover:opacity-100 transition-all"
+                            style={{ color: '#6b7280' }}
                           >
                             <Plus size={11} />
                           </button>
-                          <div className="flex-1 flex items-center justify-center gap-2">
-                            <div className="w-px h-4 bg-gray-200" />
-                          </div>
                         </div>
                       )}
                     </div>
@@ -235,9 +257,21 @@ export default function Itinerary() {
                   {/* Add at end of day */}
                   <button
                     onClick={() => handleOpenAdd(day.date)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200
-                               rounded-xl text-sm text-gray-400 hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50
-                               transition-all"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm transition-all mt-3"
+                    style={{
+                      border: '2px dashed #1e1e1e',
+                      color: '#6b7280',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = '#10b98140';
+                      (e.currentTarget as HTMLElement).style.color = '#10b981';
+                      (e.currentTarget as HTMLElement).style.backgroundColor = '#10b98108';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.borderColor = '#1e1e1e';
+                      (e.currentTarget as HTMLElement).style.color = '#6b7280';
+                      (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                    }}
                   >
                     <Plus size={14} />
                     Add event to {day.label.split(' — ')[1] ?? 'this day'}
@@ -253,8 +287,8 @@ export default function Itinerary() {
       <div className="fixed bottom-6 right-4 z-30">
         <motion.button
           onClick={() => handleOpenAdd()}
-          className="w-14 h-14 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center
-                     hover:bg-gray-800 active:bg-black"
+          className="w-14 h-14 text-white rounded-full shadow-lg flex items-center justify-center"
+          style={{ backgroundColor: '#10b981', boxShadow: '0 4px 20px rgba(16,185,129,0.4)' }}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
         >
@@ -277,61 +311,64 @@ export default function Itinerary() {
         {shareModalOpen && (
           <>
             <motion.div
-              className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
+              className="fixed inset-0 z-40"
+              style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
               onClick={() => setShareModalOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             />
             <motion.div
-              className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl"
+              className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl shadow-2xl"
+              style={{ backgroundColor: '#141414', border: '1px solid #242424' }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             >
               <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-gray-200" />
+                <div className="w-10 h-1 rounded-full" style={{ backgroundColor: '#2a2a2a' }} />
               </div>
               <div className="px-5 pt-3 pb-8">
                 <div className="flex items-center justify-between mb-5">
                   <div>
-                    <h2 className="text-xl font-black text-gray-900">Share Trip</h2>
-                    <p className="text-sm text-gray-400 mt-0.5">Anyone with these links can view or edit</p>
+                    <h2 className="text-xl font-black text-white">Share Trip</h2>
+                    <p className="text-sm mt-0.5" style={{ color: '#6b7280' }}>Anyone with these links can view or edit</p>
                   </div>
                   <button
                     onClick={() => setShareModalOpen(false)}
-                    className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: '#242424', color: '#9ca3af' }}
                   >
                     <X size={16} />
                   </button>
                 </div>
 
                 {/* Public view link */}
-                <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-4 mb-3">
+                <div className="rounded-2xl p-4 mb-3" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Eye size={15} className="text-blue-400" />
+                    <Eye size={15} style={{ color: '#10b981' }} />
                     <span className="text-white font-semibold text-sm">Public View</span>
-                    <span className="ml-auto text-xs bg-blue-500/30 text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                    <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
+                      style={{ backgroundColor: '#10b98120', color: '#10b981' }}>
                       Read-only
                     </span>
                   </div>
-                  <p className="text-slate-400 text-xs mb-3 leading-relaxed">
+                  <p className="text-xs mb-3 leading-relaxed" style={{ color: '#6b7280' }}>
                     A beautiful travel-magazine-style view. Share with family and friends — no account needed.
                   </p>
                   <div className="flex gap-2">
-                    <div className="flex-1 bg-white/10 rounded-xl px-3 py-2 text-xs text-slate-300 font-mono truncate">
+                    <div className="flex-1 rounded-xl px-3 py-2 text-xs font-mono truncate"
+                      style={{ backgroundColor: '#0a0a0a', color: '#9ca3af', border: '1px solid #242424' }}>
                       {shareUrl}
                     </div>
                     <button
-                      onClick={() => {
-                        handleCopyLink();
-                      }}
-                      className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl transition-all ${
-                        linkCopied
-                          ? 'bg-green-500 text-white'
-                          : 'bg-white text-gray-900 hover:bg-gray-100'
-                      }`}
+                      onClick={handleCopyLink}
+                      className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl transition-all"
+                      style={linkCopied
+                        ? { backgroundColor: '#10b981', color: 'white' }
+                        : { backgroundColor: '#10b981', color: 'white' }
+                      }
                     >
                       {linkCopied ? <Check size={12} /> : <Copy size={12} />}
                       {linkCopied ? 'Copied' : 'Copy'}
@@ -339,33 +376,35 @@ export default function Itinerary() {
                   </div>
                   <button
                     onClick={() => { setShareModalOpen(false); navigate(`/trip/${trip.id}/share`); }}
-                    className="mt-2 w-full text-center text-xs text-blue-400 hover:text-blue-300 py-1"
+                    className="mt-2 w-full text-center text-xs py-1 transition-colors"
+                    style={{ color: '#10b981' }}
                   >
                     Preview public view →
                   </button>
                 </div>
 
                 {/* Collab link */}
-                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                <div className="rounded-2xl p-4" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a' }}>
                   <div className="flex items-center gap-2 mb-2">
-                    <Share2 size={15} className="text-green-600" />
-                    <span className="text-gray-900 font-semibold text-sm">Collaboration Link</span>
-                    <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                    <Share2 size={15} style={{ color: '#9ca3af' }} />
+                    <span className="text-white font-semibold text-sm">Collaboration Link</span>
+                    <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
+                      style={{ backgroundColor: '#1a2a1a', color: '#86efac' }}>
                       Can edit
                     </span>
                   </div>
-                  <p className="text-gray-400 text-xs mb-3 leading-relaxed">
+                  <p className="text-xs mb-3 leading-relaxed" style={{ color: '#6b7280' }}>
                     Real-time peer-to-peer sync via WebRTC. Co-travelers can add and edit events together.
                   </p>
                   <div className="flex gap-2">
-                    <div className="flex-1 bg-white rounded-xl px-3 py-2 text-xs text-gray-500 font-mono truncate border border-gray-200">
+                    <div className="flex-1 rounded-xl px-3 py-2 text-xs font-mono truncate"
+                      style={{ backgroundColor: '#0a0a0a', color: '#9ca3af', border: '1px solid #242424' }}>
                       {editUrl}
                     </div>
                     <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(editUrl);
-                      }}
-                      className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all"
+                      onClick={() => navigator.clipboard.writeText(editUrl)}
+                      className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl transition-all"
+                      style={{ backgroundColor: '#242424', color: '#9ca3af' }}
                     >
                       <Copy size={12} />
                       Copy
@@ -373,7 +412,6 @@ export default function Itinerary() {
                   </div>
                 </div>
 
-                {/* Native share */}
                 {'share' in navigator && (
                   <button
                     onClick={async () => {
@@ -383,7 +421,8 @@ export default function Itinerary() {
                         url: shareUrl,
                       });
                     }}
-                    className="mt-3 w-full flex items-center justify-center gap-2 bg-gray-900 text-white py-3.5 rounded-2xl font-semibold"
+                    className="mt-3 w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold text-white"
+                    style={{ backgroundColor: '#242424' }}
                   >
                     <Share2 size={16} />
                     Share via…

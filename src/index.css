@@ -1,11 +1,14 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 @layer base {
   * {
     box-sizing: border-box;
   }
   body {
-    @apply bg-gray-50 text-gray-900 font-sans;
+    background-color: #0a0a0a;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -34,4 +37,40 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* Dark card style */
+.dark-card {
+  background-color: #141414;
+  border: 1px solid #242424;
+  border-radius: 1rem;
+}
+
+/* Leaflet dark overrides */
+.leaflet-container {
+  background: #0a0a0a !important;
+}
+
+.leaflet-tooltip {
+  background: rgba(20, 20, 20, 0.95) !important;
+  border: 1px solid #242424 !important;
+  color: #ffffff !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+}
+
+.leaflet-tooltip::before {
+  border-top-color: #242424 !important;
+}
+
+/* Glowing emerald pulse for active marker */
+@keyframes markerPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+
+.marker-pulse {
+  animation: markerPulse 2s infinite;
 }

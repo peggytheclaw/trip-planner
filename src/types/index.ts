@@ -21,6 +21,8 @@ export interface BaseEvent {
   notes?: string;
   createdBy?: string;  // traveler id
   createdAt: string;   // ISO datetime
+  lat?: number;        // latitude for map display
+  lng?: number;        // longitude for map display
 }
 
 export interface FlightEvent extends BaseEvent {
