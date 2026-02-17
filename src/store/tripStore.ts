@@ -16,7 +16,7 @@ interface TripStore {
   getTripById: (id: string) => Trip | null;
 
   // Trip actions
-  createTrip: (partial: Omit<Trip, 'id' | 'events' | 'createdAt' | 'updatedAt'>) => Trip;
+  createTrip: (partial: Omit<Trip, 'id' | 'events' | 'createdAt' | 'updatedAt'> & { events?: Trip['events'] }) => Trip;
   updateTrip: (id: string, updates: Partial<Trip>) => void;
   deleteTrip: (id: string) => void;
   setCurrentTrip: (id: string | null) => void;
@@ -51,7 +51,7 @@ export const useTripStore = create<TripStore>()(
         const trip: Trip = {
           ...partial,
           id: generateId(),
-          events: [],
+          events: partial.events ?? [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };

@@ -29,7 +29,7 @@ export default function CollabAvatars({
       <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium
         ${connected
           ? 'bg-green-50 text-green-600 border border-green-100'
-          : 'bg-gray-50 text-gray-400 border border-gray-100'
+          : 'bg-gray-50 text-gray-500 border border-[#242424]'
         }`}
       >
         {connected ? (
@@ -73,7 +73,7 @@ export default function CollabAvatars({
 
         {/* Tooltip */}
         {showTooltip && (
-          <div className="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-xl border border-gray-100 p-3 z-50 min-w-[180px]">
+          <div className="absolute top-full right-0 mt-2 bg-[#141414] rounded-xl shadow-xl border border-[#242424] p-3 z-50 min-w-[180px]">
             <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
               Travelers
             </div>
@@ -85,9 +85,9 @@ export default function CollabAvatars({
                 >
                   {user.name.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-gray-300">
                   {user.name}
-                  {user.isLocal && <span className="text-xs text-gray-400 ml-1">(you)</span>}
+                  {user.isLocal && <span className="text-xs text-gray-500 ml-1">(you)</span>}
                 </span>
                 {!user.isLocal && (
                   <span className="ml-auto w-2 h-2 rounded-full bg-green-400" />
@@ -97,7 +97,7 @@ export default function CollabAvatars({
             {shareUrl && (
               <button
                 onClick={() => { onCopyLink?.(); setShowTooltip(false); }}
-                className="mt-2 w-full text-xs text-blue-600 text-center py-1 border-t border-gray-100 hover:text-blue-700"
+                className="mt-2 w-full text-xs text-blue-600 text-center py-1 border-t border-[#242424] hover:text-blue-700"
               >
                 Copy invite link
               </button>
@@ -117,7 +117,7 @@ export function CollabBanner({ roomId, onJoin }: { roomId: string; onJoin: () =>
       <span className="flex-1">You were invited to collaborate on this trip</span>
       <button
         onClick={onJoin}
-        className="bg-white text-blue-600 text-xs font-bold px-3 py-1 rounded-full"
+        className="bg-[#141414] text-blue-600 text-xs font-bold px-3 py-1 rounded-full"
       >
         Join
       </button>

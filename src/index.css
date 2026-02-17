@@ -1,76 +1,145 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-@layer base {
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    background-color: #0a0a0a;
-    color: #ffffff;
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+/* ── Design Tokens ─────────────────────────────────────────────────────────── */
+:root {
+  --bg:           #0a0a0a;
+  --bg-elevated:  #141414;
+  --bg-card:      #1a1a1a;
+  --bg-input:     #1e1e1e;
+  --border:       #2a2a2a;
+  --border-light: #222222;
+  --text:         #f5f5f5;
+  --text-2:       #9ca3af;
+  --text-3:       #6b7280;
+  --accent:       #10b981;
+  --accent-glow:  rgba(16, 185, 129, 0.25);
+  --gold:         #f59e0b;
+  --blue:         #3b82f6;
+  --purple:       #8b5cf6;
+  --orange:       #f97316;
+  --red:          #ef4444;
 }
 
-@layer utilities {
-  .safe-top {
-    padding-top: env(safe-area-inset-top);
-  }
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { color-scheme: dark; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-/* Bottom sheet transitions */
+/* ── Leaflet dark overrides ─────────────────────────────────────────────────── */
+.leaflet-container {
+  background: #0a0a0a;
+}
+.leaflet-control-attribution {
+  background: rgba(0,0,0,0.6) !important;
+  color: rgba(255,255,255,0.3) !important;
+  font-size: 9px !important;
+}
+.leaflet-control-attribution a { color: rgba(255,255,255,0.4) !important; }
+
+.dark-tooltip {
+  background: rgba(20,20,20,0.95) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  color: #f5f5f5 !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+}
+.dark-tooltip::before { display: none !important; }
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Inputs ─────────────────────────────────────────────────────────────────── */
+input, textarea, select {
+  background: var(--bg-input) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+input::placeholder, textarea::placeholder {
+  color: var(--text-3) !important;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.4);
+}
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) opacity(0.4);
+}
+select option { background: var(--bg-card); color: var(--text); }
+
+/* ── Card styles ─────────────────────────────────────────────────────────────── */
+.dark-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.dark-card-elevated {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+}
+
+/* ── Glow effects ─────────────────────────────────────────────────────────────── */
+.accent-glow {
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.gold-glow {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+}
+
+/* ── Map gradient overlay (photo → dark) ────────────────────────────────────── */
+.map-overlay-bottom {
+  background: linear-gradient(to bottom, transparent 0%, rgba(10,10,10,0.7) 60%, #0a0a0a 100%);
+}
+.map-overlay-full {
+  background: linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.85) 100%);
+}
+
+/* ── Text utilities ──────────────────────────────────────────────────────────── */
+.text-primary   { color: var(--text); }
+.text-secondary { color: var(--text-2); }
+.text-muted     { color: var(--text-3); }
+.text-accent    { color: var(--accent); }
+.text-gold      { color: var(--gold); }
+
+/* ── Animations ──────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.4s ease forwards; }
+
+@keyframes pulse-accent {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+}
+.pulse-accent { animation: pulse-accent 2s infinite; }
+
+/* ── Safe area ───────────────────────────────────────────────────────────────── */
+.safe-top    { padding-top:    env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* ── Bottom sheet ─────────────────────────────────────────────────────────────── */
 .sheet-backdrop {
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.15s ease;
 }
 @keyframes fadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Dark card style */
-.dark-card {
-  background-color: #141414;
-  border: 1px solid #242424;
-  border-radius: 1rem;
-}
-
-/* Leaflet dark overrides */
-.leaflet-container {
-  background: #0a0a0a !important;
-}
-
-.leaflet-tooltip {
-  background: rgba(20, 20, 20, 0.95) !important;
-  border: 1px solid #242424 !important;
-  color: #ffffff !important;
-  border-radius: 6px !important;
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-}
-
-.leaflet-tooltip::before {
-  border-top-color: #242424 !important;
-}
-
-/* Glowing emerald pulse for active marker */
-@keyframes markerPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-}
-
-.marker-pulse {
-  animation: markerPulse 2s infinite;
+  to   { opacity: 1; }
 }

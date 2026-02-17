@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save } from 'lucide-react';
 import { EventType, TripEvent, Traveler } from '../types';
 import { EVENT_ICONS, EVENT_LABELS } from '../utils/itineraryUtils';
+import { toast } from './Toast';
 
 interface AddEventSheetProps {
   isOpen: boolean;
@@ -15,34 +16,48 @@ interface AddEventSheetProps {
 
 const EVENT_TYPES: EventType[] = ['flight', 'hotel', 'restaurant', 'activity', 'transport', 'train', 'note'];
 
-function generateId() {
-  return Math.random().toString(36).slice(2);
-}
-
 export default function AddEventSheet({
   isOpen, onClose, onSave, defaultDate, editEvent, travelers
 }: AddEventSheetProps) {
-  const [eventType, setEventType] = useState<EventType>(editEvent?.type ?? 'activity');
-  const [formData, setFormData] = useState<Record<string, any>>(
-    editEvent ? { ...editEvent } : {
-      date: defaultDate ?? new Date().toISOString().split('T')[0],
-      time: '09:00',
+  const [eventType, setEventType] = useState<EventType>('activity');
+  const [formData, setFormData] = useState<Record<string, any>>({});
+
+  // Reset form whenever sheet opens or editEvent changes
+  useEffect(() => {
+    if (isOpen) {
+      setEventType(editEvent?.type ?? 'activity');
+      setFormData(
+        editEvent
+          ? { ...editEvent }
+          : {
+              date: defaultDate ?? new Date().toISOString().split('T')[0],
+              time: '09:00',
+            }
+      );
     }
-  );
+  }, [isOpen, editEvent, defaultDate]);
 
   const update = (key: string, value: any) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
 
   const handleSave = () => {
+    const title =
+      formData.title ??
+      formData.restaurantName ??
+      formData.hotelName ??
+      formData.activityName ??
+      formData.trainName ??
+      'Event';
     const base = {
       type: eventType,
       date: formData.date ?? defaultDate ?? new Date().toISOString().split('T')[0],
       time: formData.time,
-      title: formData.title ?? formData.restaurantName ?? formData.hotelName ?? formData.activityName ?? 'Event',
+      title,
       ...formData,
     };
     onSave(base as Omit<TripEvent, 'id' | 'createdAt'>);
+    toast.success(editEvent ? 'Event updated ✓' : 'Event added ✓');
     onClose();
   };
 
@@ -52,7 +67,8 @@ export default function AddEventSheet({
         <>
           {/* Backdrop */}
           <motion.div
-            className="fixed inset-0 bg-black/40 z-40 sheet-backdrop"
+            className="fixed inset-0 z-40"
+            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -61,7 +77,8 @@ export default function AddEventSheet({
 
           {/* Sheet */}
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl max-h-[92vh] flex flex-col"
+            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl shadow-2xl max-h-[92vh] flex flex-col"
+            style={{ backgroundColor: '#141414', border: '1px solid #2a2a2a' }}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -69,15 +86,19 @@ export default function AddEventSheet({
           >
             {/* Handle */}
             <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-gray-200" />
+              <div className="w-10 h-1 rounded-full" style={{ backgroundColor: '#2a2a2a' }} />
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">
+            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid #242424' }}>
+              <h2 className="text-lg font-bold text-white">
                 {editEvent ? 'Edit Event' : 'Add Event'}
               </h2>
-              <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: '#1a1a1a', color: '#9ca3af' }}
+              >
                 <X size={16} />
               </button>
             </div>
@@ -87,26 +108,32 @@ export default function AddEventSheet({
               {/* Event Type Selector */}
               {!editEvent && (
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">
+                  <label className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: '#6b7280' }}>
                     Event Type
                   </label>
                   <div className="grid grid-cols-4 gap-2">
-                    {EVENT_TYPES.map(type => (
-                      <button
-                        key={type}
-                        onClick={() => setEventType(type)}
-                        className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl border-2 transition-all
-                          ${eventType === type
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-100 bg-white hover:border-gray-200'
-                          }`}
-                      >
-                        <span className="text-xl">{EVENT_ICONS[type]}</span>
-                        <span className={`text-xs font-medium ${eventType === type ? 'text-blue-600' : 'text-gray-500'}`}>
-                          {EVENT_LABELS[type]}
-                        </span>
-                      </button>
-                    ))}
+                    {EVENT_TYPES.map(type => {
+                      const selected = eventType === type;
+                      return (
+                        <button
+                          key={type}
+                          onClick={() => setEventType(type)}
+                          className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all"
+                          style={{
+                            border: `2px solid ${selected ? '#10b981' : '#242424'}`,
+                            backgroundColor: selected ? '#10b98120' : '#1a1a1a',
+                          }}
+                        >
+                          <span className="text-xl">{EVENT_ICONS[type]}</span>
+                          <span
+                            className="text-xs font-medium"
+                            style={{ color: selected ? '#10b981' : '#6b7280' }}
+                          >
+                            {EVENT_LABELS[type]}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -114,21 +141,23 @@ export default function AddEventSheet({
               {/* Date & Time */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Date</label>
+                  <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>Date</label>
                   <input
                     type="date"
                     value={formData.date ?? ''}
                     onChange={e => update('date', e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                    className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white"
+                    style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', colorScheme: 'dark' }}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Time</label>
+                  <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>Time</label>
                   <input
                     type="time"
                     value={formData.time ?? ''}
                     onChange={e => update('time', e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+                    className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white"
+                    style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', colorScheme: 'dark' }}
                   />
                 </div>
               </div>
@@ -138,23 +167,24 @@ export default function AddEventSheet({
 
               {/* Notes */}
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">Notes</label>
+                <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>Notes</label>
                 <textarea
                   value={formData.notes ?? ''}
                   onChange={e => update('notes', e.target.value)}
                   placeholder="Any additional info..."
                   rows={2}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 resize-none"
+                  className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white resize-none"
+                  style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}
                 />
               </div>
             </div>
 
             {/* Save Button */}
-            <div className="px-5 py-4 border-t border-gray-100 safe-bottom">
+            <div className="px-5 py-4 safe-bottom" style={{ borderTop: '1px solid #242424' }}>
               <button
                 onClick={handleSave}
-                className="w-full bg-gray-900 text-white py-3.5 rounded-2xl font-semibold text-base flex items-center justify-center gap-2
-                           hover:bg-gray-800 active:bg-black transition-colors"
+                className="w-full py-3.5 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 text-white transition-opacity hover:opacity-90"
+                style={{ backgroundColor: '#10b981' }}
               >
                 <Save size={16} />
                 Save to Itinerary
@@ -167,19 +197,23 @@ export default function AddEventSheet({
   );
 }
 
-// ─── Dynamic Form Fields ──────────────────────────────────────────────────────
+// ─── Shared sub-components ────────────────────────────────────────────────────
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">{label}</label>
+      <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>{label}</label>
       {children}
     </div>
   );
 }
 
+const inputClass = "w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white";
+const inputStyle = { backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' };
+const selectStyle = { backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', color: '#f5f5f5' };
+
 function Input({ value, onChange, placeholder, type = 'text' }: {
-  value: string; onChange: (v: string) => void; placeholder?: string; type?: string;
+  value: string | number | undefined; onChange: (v: string) => void; placeholder?: string; type?: string;
 }) {
   return (
     <input
@@ -187,7 +221,8 @@ function Input({ value, onChange, placeholder, type = 'text' }: {
       value={value ?? ''}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
+      className={inputClass}
+      style={inputStyle}
     />
   );
 }
@@ -214,23 +249,51 @@ function EventForm({ eventType, formData, update, travelers }: {
             <Field label="From (IATA)">
               <Input value={formData.fromAirport} onChange={v => update('fromAirport', v)} placeholder="SFO" />
             </Field>
+            <Field label="From City">
+              <Input value={formData.fromCity} onChange={v => update('fromCity', v)} placeholder="San Francisco" />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <Field label="To (IATA)">
               <Input value={formData.toAirport} onChange={v => update('toAirport', v)} placeholder="NRT" />
+            </Field>
+            <Field label="To City">
+              <Input value={formData.toCity} onChange={v => update('toCity', v)} placeholder="Tokyo" />
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Departure">
               <input type="time" value={formData.departureTime ?? ''} onChange={e => update('departureTime', e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400" />
+                className={inputClass} style={{ ...inputStyle, colorScheme: 'dark' }} />
             </Field>
             <Field label="Arrival">
               <input type="time" value={formData.arrivalTime ?? ''} onChange={e => update('arrivalTime', e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400" />
+                className={inputClass} style={{ ...inputStyle, colorScheme: 'dark' }} />
             </Field>
           </div>
-          <Field label="Confirmation #">
-            <Input value={formData.confirmationNumber} onChange={v => update('confirmationNumber', v)} placeholder="UAXYZ789" />
-          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Arrival Date">
+              <input type="date" value={formData.arrivalDate ?? ''} onChange={e => update('arrivalDate', e.target.value)}
+                className={inputClass} style={{ ...inputStyle, colorScheme: 'dark' }} />
+            </Field>
+            <Field label="Duration">
+              <Input value={formData.duration} onChange={v => update('duration', v)} placeholder="10h 45m" />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Cabin">
+              <select value={formData.cabin ?? 'Economy'} onChange={e => update('cabin', e.target.value)}
+                className={inputClass} style={selectStyle}>
+                <option>Economy</option>
+                <option>Premium Economy</option>
+                <option>Business</option>
+                <option>First</option>
+              </select>
+            </Field>
+            <Field label="Confirmation #">
+              <Input value={formData.confirmationNumber} onChange={v => update('confirmationNumber', v)} placeholder="ABC123" />
+            </Field>
+          </div>
         </div>
       );
 
@@ -244,9 +307,19 @@ function EventForm({ eventType, formData, update, travelers }: {
             <Input value={formData.neighborhood} onChange={v => update('neighborhood', v)} placeholder="Shinjuku" />
           </Field>
           <div className="grid grid-cols-2 gap-3">
+            <Field label="Check-in Time">
+              <input type="time" value={formData.checkInTime ?? ''} onChange={e => update('checkInTime', e.target.value)}
+                className={inputClass} style={{ ...inputStyle, colorScheme: 'dark' }} />
+            </Field>
             <Field label="Check-out Date">
               <input type="date" value={formData.checkOutDate ?? ''} onChange={e => update('checkOutDate', e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400" />
+                className={inputClass} style={{ ...inputStyle, colorScheme: 'dark' }} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Check-out Time">
+              <input type="time" value={formData.checkOutTime ?? ''} onChange={e => update('checkOutTime', e.target.value)}
+                className={inputClass} style={{ ...inputStyle, colorScheme: 'dark' }} />
             </Field>
             <Field label="$ Per Night">
               <Input value={formData.pricePerNight} onChange={v => update('pricePerNight', v)} placeholder="320" type="number" />
@@ -268,19 +341,21 @@ function EventForm({ eventType, formData, update, travelers }: {
             <Input value={formData.cuisine} onChange={v => update('cuisine', v)} placeholder="Japanese" />
           </Field>
           <Field label="Reservation Status">
-            <select
-              value={formData.reservationStatus ?? 'none'}
-              onChange={e => update('reservationStatus', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
-            >
+            <select value={formData.reservationStatus ?? 'none'} onChange={e => update('reservationStatus', e.target.value)}
+              className={inputClass} style={selectStyle}>
               <option value="none">No reservation</option>
               <option value="pending">Pending</option>
               <option value="confirmed">Confirmed ✓</option>
             </select>
           </Field>
-          <Field label="Address">
-            <Input value={formData.address} onChange={v => update('address', v)} placeholder="Shinjuku, Tokyo" />
-          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Address">
+              <Input value={formData.address} onChange={v => update('address', v)} placeholder="Shinjuku, Tokyo" />
+            </Field>
+            <Field label="Price range">
+              <Input value={formData.price} onChange={v => update('price', v)} placeholder="$$" />
+            </Field>
+          </div>
         </div>
       );
 
@@ -316,11 +391,8 @@ function EventForm({ eventType, formData, update, travelers }: {
       return (
         <div className="space-y-3">
           <Field label="Type">
-            <select
-              value={formData.transportType ?? 'car'}
-              onChange={e => update('transportType', e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
-            >
+            <select value={formData.transportType ?? 'car'} onChange={e => update('transportType', e.target.value)}
+              className={inputClass} style={selectStyle}>
               <option value="car">🚗 Car</option>
               <option value="taxi">🚕 Taxi/Uber</option>
               <option value="bus">🚌 Bus</option>
@@ -345,6 +417,9 @@ function EventForm({ eventType, formData, update, travelers }: {
               <Input value={formData.cost} onChange={v => update('cost', v)} placeholder="15" type="number" />
             </Field>
           </div>
+          <Field label="Provider">
+            <Input value={formData.provider} onChange={v => update('provider', v)} placeholder="Uber, MTA, etc." />
+          </Field>
         </div>
       );
 
@@ -370,11 +445,19 @@ function EventForm({ eventType, formData, update, travelers }: {
           <div className="grid grid-cols-2 gap-3">
             <Field label="Departs">
               <input type="time" value={formData.departureTime ?? ''} onChange={e => update('departureTime', e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400" />
+                className={inputClass} style={{ ...inputStyle, colorScheme: 'dark' }} />
             </Field>
             <Field label="Arrives">
               <input type="time" value={formData.arrivalTime ?? ''} onChange={e => update('arrivalTime', e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400" />
+                className={inputClass} style={{ ...inputStyle, colorScheme: 'dark' }} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Ticket Class">
+              <Input value={formData.ticketClass} onChange={v => update('ticketClass', v)} placeholder="2nd Class" />
+            </Field>
+            <Field label="Confirmation #">
+              <Input value={formData.confirmationNumber} onChange={v => update('confirmationNumber', v)} placeholder="XYZ-123" />
             </Field>
           </div>
         </div>
@@ -392,7 +475,8 @@ function EventForm({ eventType, formData, update, travelers }: {
               onChange={e => update('content', e.target.value)}
               placeholder="Write your note..."
               rows={4}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 resize-none"
+              className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white resize-none"
+              style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}
             />
           </Field>
         </div>

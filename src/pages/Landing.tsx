@@ -8,6 +8,7 @@ import {
 import { useWaitlistStore } from '../store/waitlistStore';
 import { useTripStore } from '../store/tripStore';
 import { sampleTrip } from '../data/sampleTrip';
+import { BackgroundMap } from '../components/MiniMap';
 
 // ─── Animated counter ─────────────────────────────────────────────────────────
 function AnimatedCount({ target, suffix = '' }: { target: number; suffix?: string }) {
@@ -258,7 +259,8 @@ function FeatureCard({
       initial={{ opacity: 0, y: 24 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow"
+      className="rounded-2xl p-5 transition-all hover:border-opacity-60"
+      style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
     >
       <div
         className="w-11 h-11 rounded-xl flex items-center justify-center mb-3"
@@ -266,8 +268,8 @@ function FeatureCard({
       >
         {icon}
       </div>
-      <h3 className="font-bold text-gray-900 mb-1.5">{title}</h3>
-      <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
+      <h3 className="font-bold mb-1.5" style={{ color: 'var(--text)' }}>{title}</h3>
+      <p className="text-sm leading-relaxed" style={{ color: 'var(--text-3)' }}>{description}</p>
     </motion.div>
   );
 }
@@ -277,21 +279,21 @@ function Testimonial({ text, name, role, color }: {
   text: string; name: string; role: string; color: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+    <div className="rounded-2xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
       <div className="flex gap-0.5 mb-3">
         {[1,2,3,4,5].map(i => (
           <Star key={i} size={13} className="text-amber-400" fill="currentColor" />
         ))}
       </div>
-      <p className="text-sm text-gray-700 leading-relaxed mb-4">"{text}"</p>
+      <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--text-2)' }}>"{text}"</p>
       <div className="flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
           style={{ backgroundColor: color }}>
           {name.charAt(0)}
         </div>
         <div>
-          <div className="font-semibold text-gray-800 text-sm">{name}</div>
-          <div className="text-xs text-gray-400">{role}</div>
+          <div className="font-semibold text-sm" style={{ color: 'var(--text)' }}>{name}</div>
+          <div className="text-xs" style={{ color: 'var(--text-3)' }}>{role}</div>
         </div>
       </div>
     </div>
@@ -315,8 +317,8 @@ function SectionHeading({ eyebrow, title, subtitle }: {
       <div className="inline-block text-xs font-bold uppercase tracking-[0.2em] text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full mb-3">
         {eyebrow}
       </div>
-      <h2 className="text-3xl sm:text-4xl font-black text-gray-900 leading-tight">{title}</h2>
-      {subtitle && <p className="text-gray-500 mt-3 text-base max-w-xl mx-auto leading-relaxed">{subtitle}</p>}
+      <h2 className="text-3xl sm:text-4xl font-black leading-tight" style={{ color: 'var(--text)' }}>{title}</h2>
+      {subtitle && <p className="mt-3 text-base max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--text-3)' }}>{subtitle}</p>}
     </motion.div>
   );
 }
@@ -334,37 +336,33 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
 
       {/* ── NAV ────────────────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
+      <nav className="sticky top-0 z-40 backdrop-blur-md" style={{ background: 'rgba(10,10,10,0.9)', borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--accent)' }}>
               <Plane size={14} className="text-white" />
             </div>
-            <span className="font-black text-gray-900 text-lg tracking-tight">Wanderplan</span>
+            <span className="font-black text-lg tracking-tight" style={{ color: 'var(--text)' }}>Wanderplan</span>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate('/discover')}
-              className="hidden sm:flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-            >
-              <Globe size={14} />
-              Discover
+            <button onClick={() => navigate('/discover')}
+              className="hidden sm:flex items-center gap-1.5 text-sm transition-colors"
+              style={{ color: 'var(--text-3)' }}>
+              <Globe size={14} />Discover
             </button>
             {hasTrips && (
-              <button
-                onClick={() => navigate('/app')}
-                className="hidden sm:flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-              >
+              <button onClick={() => navigate('/app')}
+                className="hidden sm:flex items-center gap-1.5 text-sm transition-colors"
+                style={{ color: 'var(--text-3)' }}>
                 My Trips
               </button>
             )}
-            <button
-              onClick={() => navigate('/app')}
-              className="bg-gray-900 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-800 transition-colors"
-            >
+            <button onClick={() => navigate('/app')}
+              className="text-sm font-semibold px-4 py-2 rounded-xl transition-colors text-white"
+              style={{ background: 'var(--accent)' }}>
               {hasTrips ? 'Continue planning' : 'Start free'}
             </button>
           </div>
@@ -372,26 +370,16 @@ export default function Landing() {
       </nav>
 
       {/* ── HERO ───────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-white">
-        {/* Background decoration */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] opacity-[0.04]"
-            style={{
-              background: 'radial-gradient(circle, #667eea 0%, transparent 70%)',
-              transform: 'translate(20%, -20%)',
-            }} />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] opacity-[0.04]"
-            style={{
-              background: 'radial-gradient(circle, #764ba2 0%, transparent 70%)',
-              transform: 'translate(-20%, 20%)',
-            }} />
-          {/* Grid pattern */}
-          <div className="absolute inset-0 opacity-[0.015]"
-            style={{
-              backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)',
-              backgroundSize: '60px 60px',
-            }} />
+      <section className="relative overflow-hidden" style={{ background: 'var(--bg)' }}>
+        {/* Full-screen map background */}
+        <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.35 }}>
+          <BackgroundMap center={[35.6762, 139.6503]} zoom={11} />
         </div>
+        {/* Gradient overlays */}
+        <div className="absolute inset-0 pointer-events-none map-overlay-bottom" />
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at 60% 50%, rgba(16,185,129,0.04) 0%, transparent 70%)' }} />
+      
 
         <div className="max-w-6xl mx-auto px-5 pt-16 pb-20 sm:pt-24 sm:pb-28">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
@@ -421,7 +409,8 @@ export default function Landing() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                className="text-5xl sm:text-6xl font-black text-gray-900 leading-[1.05] tracking-tight mb-5"
+                className="text-5xl sm:text-6xl font-black leading-[1.05] tracking-tight mb-5"
+                style={{ color: 'var(--text)' }}
               >
                 Trip planning<br />
                 <span className="relative inline-block">
@@ -441,7 +430,8 @@ export default function Landing() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-lg text-gray-500 leading-relaxed mb-8 max-w-lg"
+                className="text-lg leading-relaxed mb-8 max-w-lg"
+                style={{ color: 'var(--text-3)' }}
               >
                 Create beautiful itineraries together in real-time,
                 split expenses automatically, and share a stunning travel story
@@ -494,7 +484,7 @@ export default function Landing() {
       </section>
 
       {/* ── STATS ──────────────────────────────────────────────────────────── */}
-      <section className="bg-gray-950 text-white py-12">
+      <section className="py-12" style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-4xl mx-auto px-5">
           <div className="grid grid-cols-3 gap-8 text-center">
             {[
@@ -527,7 +517,7 @@ export default function Landing() {
       </section>
 
       {/* ── HOW IT WORKS ────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20" style={{ background: 'var(--bg)' }}>
         <div className="max-w-4xl mx-auto px-5">
           <SectionHeading
             eyebrow="How it works"
@@ -562,14 +552,16 @@ export default function Landing() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }}
                 transition={{ delay: i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative overflow-hidden"
+                className="rounded-2xl p-6 relative overflow-hidden"
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
               >
-                <div className="absolute top-4 right-5 text-6xl font-black text-gray-50 leading-none select-none">
+                <div className="absolute top-4 right-5 text-6xl font-black leading-none select-none"
+                  style={{ color: 'rgba(255,255,255,0.04)' }}>
                   {step.step}
                 </div>
                 <div className="text-4xl mb-4">{step.icon}</div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{step.body}</p>
+                <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--text)' }}>{step.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-3)' }}>{step.body}</p>
               </motion.div>
             ))}
           </div>
@@ -577,7 +569,7 @@ export default function Landing() {
       </section>
 
       {/* ── FEATURES ────────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-white">
+      <section className="py-20" style={{ background: 'var(--bg-elevated)' }}>
         <div className="max-w-5xl mx-auto px-5">
           <SectionHeading
             eyebrow="Features"
@@ -633,7 +625,7 @@ export default function Landing() {
       </section>
 
       {/* ── TESTIMONIALS ─────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20" style={{ background: 'var(--bg)' }}>
         <div className="max-w-4xl mx-auto px-5">
           <SectionHeading
             eyebrow="What people say"
@@ -663,7 +655,7 @@ export default function Landing() {
       </section>
 
       {/* ── DISCOVER PREVIEW ─────────────────────────────────────────────────── */}
-      <section className="py-20 bg-white">
+      <section className="py-20" style={{ background: 'var(--bg-elevated)' }}>
         <div className="max-w-5xl mx-auto px-5">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -696,7 +688,8 @@ export default function Landing() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
                 onClick={() => navigate('/discover')}
-                className="rounded-2xl overflow-hidden cursor-pointer group hover:shadow-lg transition-shadow"
+                className="rounded-2xl overflow-hidden cursor-pointer group hover:shadow-lg transition-all"
+                style={{ border: '1px solid var(--border)' }}
               >
                 <div
                   className="h-28 flex items-end px-4 pb-3 relative"
@@ -711,7 +704,8 @@ export default function Landing() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-white border border-t-0 border-gray-100 px-4 py-2.5 flex items-center gap-3 text-xs text-gray-400">
+                <div className="px-4 py-2.5 flex items-center gap-3 text-xs"
+                  style={{ background: 'var(--bg-card)', borderTop: '1px solid var(--border)', color: 'var(--text-3)' }}>
                   <span>{trip.days} days</span>
                   <span>·</span>
                   <span>{trip.events} events</span>
@@ -767,7 +761,7 @@ export default function Landing() {
       </section>
 
       {/* ── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="bg-gray-950 border-t border-white/5 py-8">
+      <footer className="py-8" style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border)' }}>
         <div className="max-w-5xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center">
