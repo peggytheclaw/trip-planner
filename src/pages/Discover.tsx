@@ -273,7 +273,7 @@ export default function Discover() {
     }
   };
 
-  const handleFork = (community: CommunityTrip) => {
+  const handleFork = async (community: CommunityTrip) => {
     const realIds: Record<string, Trip> = {
       [sampleTrip.id]: sampleTrip,
       [nycTemplate.id]: nycTemplate,
@@ -281,7 +281,7 @@ export default function Discover() {
       [baliTemplate.id]: baliTemplate,
     };
     const sourceTrip = realIds[community.trip.id] ?? sampleTrip;
-    const newTrip = createTrip({
+    const newTrip = await createTrip({
       name: sourceTrip.name + ' (copy)',
       destination: sourceTrip.destination,
       emoji: sourceTrip.emoji,
@@ -289,9 +289,6 @@ export default function Discover() {
       endDate: sourceTrip.endDate,
       coverGradient: sourceTrip.coverGradient,
       travelers: [],
-    });
-    // Copy events
-    useTripStore.getState().updateTrip(newTrip.id, {
       events: sourceTrip.events.map(e => ({
         ...e,
         id: e.id + '-fork-' + Date.now(),
@@ -315,7 +312,7 @@ export default function Discover() {
               <div className="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center">
                 <Plane size={13} className="text-white" />
               </div>
-              <span className="font-black text-gray-900 text-base tracking-tight hidden sm:block">Wanderplan</span>
+              <span className="font-black text-gray-900 text-base tracking-tight hidden sm:block">Roteiro</span>
             </button>
             <div className="w-px h-5 bg-gray-200 mx-1" />
             <div className="flex items-center gap-1.5 text-gray-500">

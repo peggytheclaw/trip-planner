@@ -38,6 +38,6 @@ export const useWaitlistStore = create<WaitlistStore>()(
 
       hasEmail: (email: string) => get().emails.includes(email.toLowerCase().trim()),
     }),
-    { name: 'wanderplan-waitlist' }
+    { name: 'roteiro-waitlist' }
   )
 );

@@ -7,8 +7,10 @@ import {
 } from 'lucide-react';
 import { useWaitlistStore } from '../store/waitlistStore';
 import { useTripStore } from '../store/tripStore';
+import { useAuthStore } from '../store/authStore';
 import { sampleTrip } from '../data/sampleTrip';
 import { BackgroundMap } from '../components/MiniMap';
+import { GoogleSignIn } from '../components/GoogleSignIn';
 
 // ─── Animated counter ─────────────────────────────────────────────────────────
 function AnimatedCount({ target, suffix = '' }: { target: number; suffix?: string }) {
@@ -80,7 +82,7 @@ function MockPhone() {
             <div className="absolute inset-0 bg-black/20" />
             <div className="relative z-10">
               <div className="flex items-center gap-1.5 text-white/70 text-[10px] font-semibold uppercase tracking-widest mb-1">
-                <Plane size={9} />WANDERPLAN
+                <Plane size={9} />ROTEIRO
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-2xl">🇯🇵</span>
@@ -328,8 +330,9 @@ function SectionHeading({ eyebrow, title, subtitle }: {
 export default function Landing() {
   const navigate = useNavigate();
   const { trips } = useTripStore();
+  const { user } = useAuthStore();
   const { getCount, joinedAt } = useWaitlistStore();
-  const hasTrips = trips.length > 0;
+  const hasTrips = trips.length > 0 || !!user;
 
   const handleTryDemo = () => {
     navigate(`/trip/${sampleTrip.id}`);
@@ -345,7 +348,7 @@ export default function Landing() {
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'var(--accent)' }}>
               <Plane size={14} className="text-white" />
             </div>
-            <span className="font-black text-lg tracking-tight" style={{ color: 'var(--text)' }}>Wanderplan</span>
+            <span className="font-black text-lg tracking-tight" style={{ color: 'var(--text)' }}>Roteiro</span>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => navigate('/discover')}
@@ -353,35 +356,38 @@ export default function Landing() {
               style={{ color: 'var(--text-3)' }}>
               <Globe size={14} />Discover
             </button>
-            {hasTrips && (
+            {user ? (
               <button onClick={() => navigate('/app')}
-                className="hidden sm:flex items-center gap-1.5 text-sm transition-colors"
-                style={{ color: 'var(--text-3)' }}>
-                My Trips
+                className="text-sm font-semibold px-4 py-2 rounded-xl transition-colors text-white"
+                style={{ background: 'var(--accent)' }}>
+                My Trips →
+              </button>
+            ) : (
+              <button onClick={() => navigate('/app')}
+                className="text-sm font-semibold px-4 py-2 rounded-xl transition-colors text-white"
+                style={{ background: 'var(--accent)' }}>
+                Sign in
               </button>
             )}
-            <button onClick={() => navigate('/app')}
-              className="text-sm font-semibold px-4 py-2 rounded-xl transition-colors text-white"
-              style={{ background: 'var(--accent)' }}>
-              {hasTrips ? 'Continue planning' : 'Start free'}
-            </button>
           </div>
         </div>
       </nav>
 
       {/* ── HERO ───────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden" style={{ background: 'var(--bg)' }}>
-        {/* Full-screen map background */}
-        <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.35 }}>
+        {/* Full-screen map background — sits at z-index 0 */}
+        <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.25, zIndex: 0 }}>
           <BackgroundMap center={[35.6762, 139.6503]} zoom={11} />
         </div>
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 pointer-events-none map-overlay-bottom" />
+        {/* Gradient overlays — z-index 1 */}
+        <div className="absolute inset-0 pointer-events-none map-overlay-bottom" style={{ zIndex: 1 }} />
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at 60% 50%, rgba(16,185,129,0.04) 0%, transparent 70%)' }} />
+          style={{ zIndex: 1, background: 'linear-gradient(105deg, rgba(10,10,10,0.92) 0%, rgba(10,10,10,0.80) 40%, rgba(10,10,10,0.3) 65%, transparent 100%)' }} />
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ zIndex: 1, background: 'radial-gradient(ellipse at 60% 50%, rgba(16,185,129,0.04) 0%, transparent 70%)' }} />
       
 
-        <div className="max-w-6xl mx-auto px-5 pt-16 pb-20 sm:pt-24 sm:pb-28">
+        <div className="max-w-6xl mx-auto px-5 pt-16 pb-20 sm:pt-24 sm:pb-28" style={{ position: 'relative', zIndex: 2 }}>
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
 
             {/* Left: copy + waitlist */}
@@ -404,13 +410,15 @@ export default function Landing() {
                 </span>
               </motion.div>
 
-              {/* Headline */}
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              {/* Headline — pure CSS animation, no Framer Motion opacity on this element
+                  (FM opacity creates stacking contexts that let gradient overlays bleed through) */}
+              <h1
                 className="text-5xl sm:text-6xl font-black leading-[1.05] tracking-tight mb-5"
-                style={{ color: 'var(--text)' }}
+                style={{
+                  color: '#ffffff',
+                  textShadow: '0 2px 20px rgba(0,0,0,0.8)',
+                  animation: 'heroFadeUp 0.6s 0.1s cubic-bezier(0.22,1,0.36,1) both',
+                }}
               >
                 Trip planning<br />
                 <span className="relative inline-block">
@@ -420,11 +428,11 @@ export default function Landing() {
                     animate={{ scaleX: 1 }}
                     transition={{ delay: 0.8, duration: 0.5, ease: 'easeOut' }}
                     className="absolute -bottom-1 left-0 right-0 h-1 rounded-full origin-left"
-                    style={{ background: 'linear-gradient(90deg, #667eea, #764ba2)' }}
+                    style={{ background: 'linear-gradient(90deg, #667eea, #764ba2)', zIndex: 0 }}
                   />
                 </span>
                 <br />will love.
-              </motion.h1>
+              </h1>
 
               <motion.p
                 initial={{ opacity: 0 }}
@@ -438,31 +446,59 @@ export default function Landing() {
                 — all in one link. No accounts, no friction.
               </motion.p>
 
-              {/* Waitlist form */}
+              {/* Primary CTA */}
               <motion.div
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="space-y-3"
+                className="space-y-4"
               >
-                <WaitlistForm size="hero" />
-                <div className="flex items-center gap-4 text-xs text-gray-400">
-                  <span className="flex items-center gap-1"><Check size={12} className="text-green-500" />Free forever plan</span>
-                  <span className="flex items-center gap-1"><Check size={12} className="text-green-500" />No credit card</span>
-                  <span className="flex items-center gap-1"><Check size={12} className="text-green-500" />Works on mobile</span>
-                </div>
+                {user ? (
+                  <button
+                    onClick={() => navigate('/app')}
+                    className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-white text-base transition-all hover:opacity-90 active:scale-95"
+                    style={{ background: 'var(--accent)' }}
+                  >
+                    Go to My Trips
+                    <ArrowRight size={18} />
+                  </button>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <div>
+                      <GoogleSignIn redirectTo="/app" size="large" />
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-gray-400">
+                      <span className="flex items-center gap-1"><Check size={12} className="text-green-500" />Free forever plan</span>
+                      <span className="flex items-center gap-1"><Check size={12} className="text-green-500" />No credit card</span>
+                      <span className="flex items-center gap-1"><Check size={12} className="text-green-500" />Works on mobile</span>
+                    </div>
+                  </div>
+                )}
               </motion.div>
 
-              {/* Or try demo */}
+              {/* Waitlist for "not ready" users */}
+              {!user && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="mt-4 pt-4 border-t border-white/10"
+                >
+                  <p className="text-xs text-gray-500 mb-2">Not ready? Join the waitlist instead:</p>
+                  <WaitlistForm size="compact" />
+                </motion.div>
+              )}
+
+              {/* Try demo */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 }}
-                className="mt-5"
+                transition={{ delay: 0.7 }}
+                className="mt-4"
               >
                 <button
                   onClick={handleTryDemo}
-                  className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-300 transition-colors"
                 >
                   or explore the Tokyo demo
                   <ArrowRight size={14} />
@@ -745,18 +781,32 @@ export default function Landing() {
             Your next adventure<br />starts here.
           </h2>
           <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-            Join the waitlist or start planning right now — no account needed.
+            Sign in with Google to start planning. Free forever, no credit card needed.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6 max-w-md mx-auto">
-            <WaitlistForm size="compact" />
-          </div>
-          <button
-            onClick={() => navigate('/app')}
-            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-          >
-            Skip the waitlist — try it now
-            <ArrowRight size={14} />
-          </button>
+          {user ? (
+            <button
+              onClick={() => navigate('/app')}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white text-lg transition-all hover:opacity-90"
+              style={{ background: 'var(--accent)' }}
+            >
+              Go to My Trips <ArrowRight size={20} />
+            </button>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                <GoogleSignIn redirectTo="/app" size="large" theme="filled_black" />
+              </div>
+              <div className="text-gray-500 text-sm">
+                or{' '}
+                <button
+                  onClick={handleTryDemo}
+                  className="text-gray-400 hover:text-white underline transition-colors"
+                >
+                  explore the Tokyo demo without signing in
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -767,7 +817,7 @@ export default function Landing() {
             <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center">
               <Plane size={12} className="text-white" />
             </div>
-            <span className="font-black text-white">Wanderplan</span>
+            <span className="font-black text-white">Roteiro</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-gray-500">
             <button onClick={() => navigate('/discover')} className="hover:text-white transition-colors">Discover</button>

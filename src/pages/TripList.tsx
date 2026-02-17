@@ -22,11 +22,11 @@ const AVATAR_COLORS = ['#3B82F6', '#10B981', '#F97316', '#8B5CF6', '#EF4444', '#
 
 function useWaitlist() {
   const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(() => !!localStorage.getItem('wanderplan_waitlist'));
+  const [submitted, setSubmitted] = useState(() => !!localStorage.getItem('roteiro_waitlist'));
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    localStorage.setItem('wanderplan_waitlist', email);
+    localStorage.setItem('roteiro_waitlist', email);
     setSubmitted(true);
   };
   return { email, setEmail, submitted, submit };
@@ -49,25 +49,30 @@ export default function TripList() {
     navigate(`/trip/${trip.id}`);
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!newTrip.name || !newTrip.destination) return;
-    const trip = createTrip({
-      name: newTrip.name,
-      destination: newTrip.destination,
-      emoji: newTrip.emoji,
-      startDate: newTrip.startDate || new Date().toISOString().split('T')[0],
-      endDate: newTrip.endDate || new Date().toISOString().split('T')[0],
-      travelers: travelers.map((t, i) => ({
-        id: `t-${i}-${Date.now()}`,
-        name: t.name,
-        color: t.color,
-      })),
-      coverGradient: GRADIENTS[Math.floor(Math.random() * GRADIENTS.length)],
-    });
-    setCurrentTrip(trip.id);
-    setShowCreate(false);
-    toast.success('Trip created ✓');
-    navigate(`/trip/${trip.id}`);
+    try {
+      const trip = await createTrip({
+        name: newTrip.name,
+        destination: newTrip.destination,
+        emoji: newTrip.emoji,
+        startDate: newTrip.startDate || new Date().toISOString().split('T')[0],
+        endDate: newTrip.endDate || new Date().toISOString().split('T')[0],
+        travelers: travelers.map((t, i) => ({
+          id: `t-${i}-${Date.now()}`,
+          name: t.name,
+          color: t.color,
+        })),
+        coverGradient: GRADIENTS[Math.floor(Math.random() * GRADIENTS.length)],
+      });
+      setCurrentTrip(trip.id);
+      setShowCreate(false);
+      toast.success('Trip created ✓');
+      navigate(`/trip/${trip.id}`);
+    } catch (err) {
+      console.error('Create trip error:', err);
+      toast.success('Failed to create trip. Please try again.');
+    }
   };
 
   const handleAddTraveler = () => {
@@ -78,21 +83,25 @@ export default function TripList() {
     setTravelerInput('');
   };
 
-  const handleUseTemplate = (tmpl: TemplateInfo) => {
-    const trip = createTrip({
-      name: tmpl.trip.name,
-      destination: tmpl.trip.destination,
-      emoji: tmpl.trip.emoji,
-      startDate: tmpl.trip.startDate,
-      endDate: tmpl.trip.endDate,
-      travelers: [],
-      events: tmpl.trip.events,
-      coverGradient: tmpl.trip.coverGradient,
-    });
-    setCurrentTrip(trip.id);
-    setShowTemplates(false);
-    toast.success(`${tmpl.trip.name} template loaded ✓`);
-    navigate(`/trip/${trip.id}`);
+  const handleUseTemplate = async (tmpl: TemplateInfo) => {
+    try {
+      const trip = await createTrip({
+        name: tmpl.trip.name,
+        destination: tmpl.trip.destination,
+        emoji: tmpl.trip.emoji,
+        startDate: tmpl.trip.startDate,
+        endDate: tmpl.trip.endDate,
+        travelers: [],
+        events: tmpl.trip.events,
+        coverGradient: tmpl.trip.coverGradient,
+      });
+      setCurrentTrip(trip.id);
+      setShowTemplates(false);
+      toast.success(`${tmpl.trip.name} template loaded ✓`);
+      navigate(`/trip/${trip.id}`);
+    } catch (err) {
+      console.error('Template load error:', err);
+    }
   };
 
   return (
@@ -110,7 +119,7 @@ export default function TripList() {
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#10b981' }}>
               <Plane size={16} className="text-white" />
             </div>
-            <span className="text-white font-bold text-lg tracking-tight">Wanderplan</span>
+            <span className="text-white font-bold text-lg tracking-tight">Roteiro</span>
           </div>
           {trips.length > 0 && (
             <div className="flex items-center gap-2">

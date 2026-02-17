@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import Landing from './pages/Landing';
 import TripList from './pages/TripList';
 import Itinerary from './pages/Itinerary';
@@ -8,6 +9,8 @@ import EventDetail from './pages/EventDetail';
 import ShareView from './pages/ShareView';
 import Discover from './pages/Discover';
 import ToastContainer from './components/Toast';
+import { useAuthStore } from './store/authStore';
+import { useTripStore } from './store/tripStore';
 
 function NotFound() {
   const navigate = useNavigate();
@@ -19,33 +22,75 @@ function NotFound() {
       <button onClick={() => navigate('/')}
         className="mt-2 px-6 py-3 rounded-xl font-semibold text-white"
         style={{ backgroundColor: '#10b981' }}>
-        ← Back to Wanderplan
+        ← Back to Roteiro
       </button>
     </div>
   );
 }
 
+/** Auth guard: redirects to / if not signed in (except public routes) */
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuthStore();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
+        <div className="text-4xl animate-spin">✈️</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+}
+
+/** Loads trips after authentication */
+function AuthLoader({ children }: { children: React.ReactNode }) {
+  const { user, initialize } = useAuthStore();
+  const { loadTrips } = useTripStore();
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  useEffect(() => {
+    if (user) {
+      loadTrips(user.id);
+    }
+  }, [user, loadTrips]);
+
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <ToastContainer />
-      <Routes>
-        {/* Marketing */}
-        <Route path="/" element={<Landing />} />
-        <Route path="/discover" element={<Discover />} />
+      <AuthLoader>
+        <ToastContainer />
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/discover" element={<Discover />} />
 
-        {/* App */}
-        <Route path="/app" element={<TripList />} />
-        <Route path="/trip/:tripId" element={<Itinerary />} />
-        <Route path="/trip/:tripId/share" element={<ShareView />} />
-        <Route path="/trip/:tripId/event/:eventId" element={<EventDetail />} />
-        <Route path="/trip/:tripId/expenses" element={<Expenses />} />
-        <Route path="/trip/:tripId/settings" element={<TripSettings />} />
+          {/* Public share view — no auth needed */}
+          <Route path="/trip/:tripId/share" element={<ShareView />} />
 
-        {/* Legacy redirect */}
-        <Route path="/trips" element={<Navigate to="/app" replace />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* Protected app routes */}
+          <Route path="/app" element={<RequireAuth><TripList /></RequireAuth>} />
+          <Route path="/trip/:tripId" element={<RequireAuth><Itinerary /></RequireAuth>} />
+          <Route path="/trip/:tripId/event/:eventId" element={<RequireAuth><EventDetail /></RequireAuth>} />
+          <Route path="/trip/:tripId/expenses" element={<RequireAuth><Expenses /></RequireAuth>} />
+          <Route path="/trip/:tripId/settings" element={<RequireAuth><TripSettings /></RequireAuth>} />
+
+          {/* Legacy redirect */}
+          <Route path="/trips" element={<Navigate to="/app" replace />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthLoader>
     </BrowserRouter>
   );
 }

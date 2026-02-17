@@ -44,9 +44,17 @@ export default function ShareView() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
   const trip = useTripStore(s => s.getTripById(tripId!));
+  const { loadTripById } = useTripStore();
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
+
+  // Load trip from Supabase if not already in local state (e.g., direct share link)
+  useEffect(() => {
+    if (tripId && !trip) {
+      loadTripById(tripId);
+    }
+  }, [tripId, trip, loadTripById]);
 
   useEffect(() => {
     setCanShare('share' in navigator);
@@ -67,7 +75,7 @@ export default function ShareView() {
         <h1 className="text-xl font-bold text-white">Trip not found</h1>
         <p className="text-sm" style={{ color: '#6b7280' }}>This itinerary may have been deleted or the link is incorrect.</p>
         <button onClick={() => navigate('/')} className="mt-2 text-sm" style={{ color: '#10b981' }}>
-          ← Back to Wanderplan
+          ← Back to Roteiro
         </button>
       </div>
     );
@@ -162,7 +170,7 @@ function ShareHero({ trip, nights, onCopy, onShare, copied, canShare }: {
           <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: '#10b981' }}>
             <Plane size={9} className="text-white" />
           </div>
-          <span className="text-white text-xs font-semibold tracking-wide">WANDERPLAN</span>
+          <span className="text-white text-xs font-semibold tracking-wide">ROTEIRO</span>
         </button>
 
         <div className="flex items-center gap-2">
@@ -767,7 +775,7 @@ function ShareFooter({ trip, onCopy, onShare, copied, canShare }: {
         </button>
 
         <p className="mt-8 text-sm" style={{ color: '#3a3a3a' }}>
-          Shared via <span style={{ color: '#6b7280' }}>wanderplan.app</span>
+          Shared via <span style={{ color: '#6b7280' }}>roteiro.app</span>
         </p>
       </div>
 
@@ -778,10 +786,10 @@ function ShareFooter({ trip, onCopy, onShare, copied, canShare }: {
               style={{ backgroundColor: '#10b981' }}>
               <Plane size={14} className="text-white" />
             </div>
-            <span className="font-black text-white text-base tracking-tight">Wanderplan</span>
+            <span className="font-black text-white text-base tracking-tight">Roteiro</span>
           </button>
           <p className="text-xs" style={{ color: '#3a3a3a' }}>
-            Made with <span style={{ color: '#6b7280' }}>Wanderplan</span>
+            Made with <span style={{ color: '#6b7280' }}>Roteiro</span>
           </p>
         </div>
       </div>

@@ -69,7 +69,7 @@ export const usePackListStore = create<PackListStore>()(
         }));
       },
     }),
-    { name: 'wanderplan-packlist' }
+    { name: 'roteiro-packlist' }
   )
 );
 

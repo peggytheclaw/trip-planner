@@ -101,11 +101,11 @@ export default function Expenses() {
     }));
   };
 
-  const handleAddExpense = () => {
+  const handleAddExpense = async () => {
     if (!form.description || !form.amount || form.splits.length === 0) return;
     const amount = parseFloat(form.amount);
     const perPerson = Math.round((amount / form.splits.length) * 100) / 100;
-    const newExpense = addExpense({
+    const newExpense = await addExpense({
       tripId: tripId!,
       description: form.description,
       amount,
