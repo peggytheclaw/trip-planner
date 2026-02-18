@@ -1,5 +1,8 @@
 import { Trip } from '../types';
 import { sampleTrip } from './sampleTrip';
+import { amalfiTemplate, patagoniaTemplate, moroccoTemplate, icelandTemplate, thailandTemplate } from './moreTemplates';
+
+export { amalfiTemplate, patagoniaTemplate, moroccoTemplate, icelandTemplate, thailandTemplate };
 
 // ─── NYC Weekend Template ─────────────────────────────────────────────────────
 
@@ -669,5 +672,45 @@ export const TEMPLATES: TemplateInfo[] = [
     duration: '7 days',
     difficulty: 'Adventure',
     bestFor: 'Couples, solo travelers, wellness',
+  },
+  {
+    trip: amalfiTemplate,
+    tagline: 'Limoncello, cliff roads & the Tyrrhenian Sea',
+    highlights: ['Boat Tour of the Coast', 'Villa Rufolo Gardens', 'Pompeii Ruins', 'Amalfi Cathedral'],
+    duration: '7 days',
+    difficulty: 'Easy',
+    bestFor: 'Couples, foodies, culture lovers',
+  },
+  {
+    trip: patagoniaTemplate,
+    tagline: 'The W Circuit — towers, glaciers & aching legs',
+    highlights: ['Grey Glacier Boat Tour', 'Valle del Francés', 'Torres Base Sunrise', 'Wild Patagonia'],
+    duration: '10 days',
+    difficulty: 'Adventure',
+    bestFor: 'Trekkers, adventure seekers',
+  },
+  {
+    trip: moroccoTemplate,
+    tagline: 'Medinas, riads & sleeping under the Sahara stars',
+    highlights: ['Jemaa el-Fna Square', 'Fes Tanneries', 'Camel Trek', 'Sahara Desert Camp'],
+    duration: '10 days',
+    difficulty: 'Moderate',
+    bestFor: 'Solo travelers, culture seekers',
+  },
+  {
+    trip: icelandTemplate,
+    tagline: 'Drive the edge of the world on Ring Road',
+    highlights: ['Jökulsárlón Glacier Lagoon', 'Mývatn Nature Baths', 'Golden Circle', 'Blue Lagoon'],
+    duration: '10 days',
+    difficulty: 'Moderate',
+    bestFor: 'Couples, road trip lovers, nature fans',
+  },
+  {
+    trip: thailandTemplate,
+    tagline: 'Bangkok street food, beach villas & Railay cliffs',
+    highlights: ['Ang Thong Marine Park', 'Phi Phi Islands', 'Railay Rock Climbing', 'NYE Beach Party'],
+    duration: '11 days',
+    difficulty: 'Easy',
+    bestFor: 'Groups, beach lovers, adventurers',
   },
 ];

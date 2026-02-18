@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useTripStore } from '../store/tripStore';
 import { sampleTrip } from '../data/sampleTrip';
-import { nycTemplate, euroTemplate, baliTemplate } from '../data/templates';
+import { nycTemplate, euroTemplate, baliTemplate, amalfiTemplate, patagoniaTemplate, moroccoTemplate, icelandTemplate, thailandTemplate } from '../data/templates';
 import type { Trip } from '../types';
 
 // ─── Seeded community trips (the "discover" feed) ─────────────────────────────
@@ -57,52 +57,33 @@ const COMMUNITY_TRIPS: CommunityTrip[] = [
     saves: 98,
     tags: ['Asia', 'Wellness', 'Nature', 'Couples'],
   },
-  // Additional seeded trips (UI only — share to demo trip)
   {
-    trip: {
-      ...sampleTrip,
-      id: 'seed-patagonia',
-      name: 'Patagonia Trekking',
-      destination: 'Torres del Paine, Chile',
-      emoji: '⛰️',
-      startDate: '2025-11-01',
-      endDate: '2025-11-14',
-      coverGradient: 'linear-gradient(135deg, #2980b9 0%, #6dd5fa 100%)',
-    },
+    trip: amalfiTemplate,
+    author: 'Marco & Lucia',
+    authorColor: '#56ab2f',
+    views: 2190,
+    saves: 147,
+    featured: true,
+    tags: ['Europe', 'Couples', 'Road trip', 'Food'],
+  },
+  {
+    trip: patagoniaTemplate,
     author: 'Mike R.',
     authorColor: '#2980b9',
-    views: 876,
-    saves: 55,
+    views: 1843,
+    saves: 122,
     tags: ['South America', 'Adventure', 'Trekking', 'Nature'],
   },
   {
-    trip: {
-      ...sampleTrip,
-      id: 'seed-morocco',
-      name: 'Morocco Medinas',
-      destination: 'Marrakech → Fes → Sahara',
-      emoji: '🕌',
-      startDate: '2025-04-10',
-      endDate: '2025-04-19',
-      coverGradient: 'linear-gradient(135deg, #e96c2b 0%, #f9d55b 100%)',
-    },
+    trip: moroccoTemplate,
     author: 'Sofia L.',
     authorColor: '#e96c2b',
     views: 1543,
     saves: 89,
-    tags: ['Africa', 'Culture', 'Budget', 'Solo'],
+    tags: ['Africa', 'Culture', 'Solo', 'Budget'],
   },
   {
-    trip: {
-      ...sampleTrip,
-      id: 'seed-iceland',
-      name: 'Iceland Ring Road',
-      destination: 'Reykjavík & Ring Road, Iceland',
-      emoji: '🌋',
-      startDate: '2025-08-15',
-      endDate: '2025-08-24',
-      coverGradient: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
-    },
+    trip: icelandTemplate,
     author: 'Emma & Chris',
     authorColor: '#43cea2',
     views: 2671,
@@ -111,16 +92,7 @@ const COMMUNITY_TRIPS: CommunityTrip[] = [
     tags: ['Europe', 'Road trip', 'Adventure', 'Nature'],
   },
   {
-    trip: {
-      ...sampleTrip,
-      id: 'seed-thailand',
-      name: 'Thailand Island Hop',
-      destination: 'Bangkok → Koh Samui → Krabi',
-      emoji: '🏝️',
-      startDate: '2025-12-26',
-      endDate: '2026-01-05',
-      coverGradient: 'linear-gradient(135deg, #f7971e 0%, #ffd200 100%)',
-    },
+    trip: thailandTemplate,
     author: 'Dan & crew',
     authorColor: '#f7971e',
     views: 3318,
@@ -265,7 +237,17 @@ export default function Discover() {
 
   const handleOpen = (community: CommunityTrip) => {
     // Navigate to share view — for seeded trips without real data, go to tokyo demo
-    const realIds = [sampleTrip.id, nycTemplate.id, euroTemplate.id, baliTemplate.id];
+    const realIds = [
+      sampleTrip.id,
+      nycTemplate.id,
+      euroTemplate.id,
+      baliTemplate.id,
+      amalfiTemplate.id,
+      patagoniaTemplate.id,
+      moroccoTemplate.id,
+      icelandTemplate.id,
+      thailandTemplate.id,
+    ];
     if (realIds.includes(community.trip.id)) {
       navigate(`/trip/${community.trip.id}/share`);
     } else {
@@ -279,6 +261,11 @@ export default function Discover() {
       [nycTemplate.id]: nycTemplate,
       [euroTemplate.id]: euroTemplate,
       [baliTemplate.id]: baliTemplate,
+      [amalfiTemplate.id]: amalfiTemplate,
+      [patagoniaTemplate.id]: patagoniaTemplate,
+      [moroccoTemplate.id]: moroccoTemplate,
+      [icelandTemplate.id]: icelandTemplate,
+      [thailandTemplate.id]: thailandTemplate,
     };
     const sourceTrip = realIds[community.trip.id] ?? sampleTrip;
     const newTrip = await createTrip({
