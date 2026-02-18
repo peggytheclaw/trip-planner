@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save } from 'lucide-react';
 import { EventType, TripEvent, Traveler } from '../types';
@@ -21,6 +21,7 @@ export default function AddEventSheet({
 }: AddEventSheetProps) {
   const [eventType, setEventType] = useState<EventType>('activity');
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
 
   // Reset form whenever sheet opens or editEvent changes
   useEffect(() => {
@@ -34,6 +35,10 @@ export default function AddEventSheet({
               time: '09:00',
             }
       );
+      // Auto-focus the first meaningful input after animation settles
+      setTimeout(() => {
+        firstInputRef.current?.focus();
+      }, 150);
     }
   }, [isOpen, editEvent, defaultDate]);
 
@@ -163,7 +168,7 @@ export default function AddEventSheet({
               </div>
 
               {/* Dynamic form fields */}
-              <EventForm eventType={eventType} formData={formData} update={update} travelers={travelers} />
+              <EventForm eventType={eventType} formData={formData} update={update} travelers={travelers} firstInputRef={firstInputRef} />
 
               {/* Notes */}
               <div>
@@ -212,26 +217,29 @@ const inputClass = "w-full rounded-xl px-3 py-2.5 text-sm outline-none text-whit
 const inputStyle = { backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' };
 const selectStyle = { backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', color: '#f5f5f5' };
 
-function Input({ value, onChange, placeholder, type = 'text' }: {
-  value: string | number | undefined; onChange: (v: string) => void; placeholder?: string; type?: string;
-}) {
+const Input = React.forwardRef<HTMLInputElement, {
+  value: string | number | undefined; onChange: (v: string) => void; placeholder?: string; type?: string; autoFocus?: boolean;
+}>(function Input({ value, onChange, placeholder, type = 'text', autoFocus }, ref) {
   return (
     <input
+      ref={ref}
       type={type}
       value={value ?? ''}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
+      autoFocus={autoFocus}
       className={inputClass}
       style={inputStyle}
     />
   );
-}
+});
 
-function EventForm({ eventType, formData, update, travelers }: {
+function EventForm({ eventType, formData, update, travelers, firstInputRef }: {
   eventType: EventType;
   formData: Record<string, any>;
   update: (key: string, value: any) => void;
   travelers: Traveler[];
+  firstInputRef: React.Ref<HTMLInputElement>;
 }) {
   switch (eventType) {
     case 'flight':
@@ -239,7 +247,7 @@ function EventForm({ eventType, formData, update, travelers }: {
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Airline">
-              <Input value={formData.airline} onChange={v => update('airline', v)} placeholder="United Airlines" />
+              <Input ref={firstInputRef} value={formData.airline} onChange={v => update('airline', v)} placeholder="United Airlines" />
             </Field>
             <Field label="Flight #">
               <Input value={formData.flightNumber} onChange={v => update('flightNumber', v)} placeholder="UA837" />
@@ -301,7 +309,7 @@ function EventForm({ eventType, formData, update, travelers }: {
       return (
         <div className="space-y-3">
           <Field label="Hotel Name">
-            <Input value={formData.hotelName} onChange={v => update('hotelName', v)} placeholder="Park Hyatt Tokyo" />
+            <Input ref={firstInputRef} value={formData.hotelName} onChange={v => update('hotelName', v)} placeholder="Park Hyatt Tokyo" />
           </Field>
           <Field label="Neighborhood / Area">
             <Input value={formData.neighborhood} onChange={v => update('neighborhood', v)} placeholder="Shinjuku" />
@@ -335,7 +343,7 @@ function EventForm({ eventType, formData, update, travelers }: {
       return (
         <div className="space-y-3">
           <Field label="Restaurant Name">
-            <Input value={formData.restaurantName} onChange={v => update('restaurantName', v)} placeholder="Ichiran Ramen" />
+            <Input ref={firstInputRef} value={formData.restaurantName} onChange={v => update('restaurantName', v)} placeholder="Ichiran Ramen" />
           </Field>
           <Field label="Cuisine">
             <Input value={formData.cuisine} onChange={v => update('cuisine', v)} placeholder="Japanese" />
@@ -363,7 +371,7 @@ function EventForm({ eventType, formData, update, travelers }: {
       return (
         <div className="space-y-3">
           <Field label="Activity Name">
-            <Input value={formData.activityName} onChange={v => update('activityName', v)} placeholder="Senso-ji Temple" />
+            <Input ref={firstInputRef} value={formData.activityName} onChange={v => update('activityName', v)} placeholder="Senso-ji Temple" />
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Location">
@@ -467,7 +475,7 @@ function EventForm({ eventType, formData, update, travelers }: {
       return (
         <div className="space-y-3">
           <Field label="Title">
-            <Input value={formData.title} onChange={v => update('title', v)} placeholder="Packing reminder..." />
+            <Input ref={firstInputRef} value={formData.title} onChange={v => update('title', v)} placeholder="Packing reminder..." />
           </Field>
           <Field label="Content">
             <textarea

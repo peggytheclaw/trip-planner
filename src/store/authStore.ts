@@ -9,7 +9,7 @@ interface AuthState {
   initialized: boolean
 
   initialize: () => Promise<void>
-  signInWithGoogle: (googleToken: string) => Promise<void>
+  signInWithGoogle: (googleToken: string, nonce?: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -21,6 +21,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     if (get().initialized) return
+
+    // Playwright test mode: mock user injected via __PLAYWRIGHT_MOCK_USER__
+    if (typeof window !== 'undefined' && (window as any).__PLAYWRIGHT_MOCK_USER__) {
+      set({ user: (window as any).__PLAYWRIGHT_MOCK_USER__, loading: false, initialized: true })
+      return
+    }
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -35,12 +41,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  signInWithGoogle: async (googleToken: string) => {
+  signInWithGoogle: async (googleToken: string, nonce?: string) => {
     set({ loading: true })
     try {
       const { data, error } = await supabase.auth.signInWithIdToken({
         provider: 'google',
         token: googleToken,
+        nonce, // required for Supabase to verify the token
       })
       if (error) throw error
       set({ session: data.session, user: data.user, loading: false })
