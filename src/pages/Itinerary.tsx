@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Share2, DollarSign, Settings, Plus, Check,
-  Copy, X, Eye, Map,
+  Copy, X, Eye, Map, ClipboardList,
 } from 'lucide-react';
 import { useTripStore } from '../store/tripStore';
 import { groupEventsByDay, getActiveHotel, detectMealGap } from '../utils/itineraryUtils';
@@ -161,7 +161,7 @@ export default function Itinerary() {
       <div className="max-w-xl mx-auto px-4 py-5 pb-28">
         {dayGroups.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-5xl mb-4">📋</div>
+            <div className="mb-4 flex justify-center"><ClipboardList size={48} style={{ color: 'var(--text-3)' }} /></div>
             <h3 className="font-bold mb-2" style={{ color: 'var(--text)' }}>No events yet</h3>
             <p className="text-sm mb-6" style={{ color: 'var(--text-3)' }}>Start building your itinerary</p>
             <button

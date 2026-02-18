@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, MapPin, Calendar, Users, Plane, ChevronRight, X, Check, Layout } from 'lucide-react';
+import { Plus, MapPin, Calendar, Users, Plane, ChevronRight, X, Check, Layout, Map, DollarSign, Share2 } from 'lucide-react';
 import { useTripStore } from '../store/tripStore';
 import { formatDate } from '../utils/itineraryUtils';
 import { Trip } from '../types';
@@ -203,13 +203,15 @@ export default function TripList() {
         <div className="relative z-20 pb-16 px-6">
           <div className="max-w-lg mx-auto grid grid-cols-3 gap-4">
             {[
-              { icon: '🗺️', label: 'Visual Itinerary', desc: 'Map-based planning' },
-              { icon: '💸', label: 'Split Expenses', desc: 'Auto-calculated splits' },
-              { icon: '✈️', label: 'Share Beautifully', desc: 'Travel-mag style view' },
+              { Icon: Map,        label: 'Visual Itinerary', desc: 'Map-based planning',       color: '#3B82F6' },
+              { Icon: DollarSign, label: 'Split Expenses',   desc: 'Auto-calculated splits',  color: '#10B981' },
+              { Icon: Share2,     label: 'Share Beautifully',desc: 'Travel-mag style view',   color: '#8B5CF6' },
             ].map(f => (
               <div key={f.label} className="text-center p-4 rounded-2xl"
                 style={{ backgroundColor: '#0f0f0f', border: '1px solid #1a1a1a' }}>
-                <div className="text-2xl mb-2">{f.icon}</div>
+                <div className="mb-2 flex justify-center">
+                  <f.Icon size={24} style={{ color: f.color }} />
+                </div>
                 <div className="text-white text-xs font-semibold mb-1">{f.label}</div>
                 <div className="text-xs" style={{ color: '#6b7280' }}>{f.desc}</div>
               </div>

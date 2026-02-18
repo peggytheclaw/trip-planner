@@ -145,12 +145,13 @@ export const EVENT_LABELS: Record<string, string> = {
   note: 'Note',
 };
 
+// Legacy string icons (kept for any data references)
 export const EVENT_ICONS: Record<string, string> = {
-  flight: '✈️',
-  hotel: '🏨',
-  restaurant: '🍽️',
-  activity: '🎯',
-  transport: '🚗',
-  train: '🚂',
-  note: '📝',
+  flight: 'flight',
+  hotel: 'hotel',
+  restaurant: 'restaurant',
+  activity: 'activity',
+  transport: 'transport',
+  train: 'train',
+  note: 'note',
 };

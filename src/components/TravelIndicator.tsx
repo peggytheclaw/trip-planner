@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Plus, AlertTriangle, Moon } from 'lucide-react';
+import { Plus, AlertTriangle, Moon, Utensils } from 'lucide-react';
 import type { TravelEstimate } from '../utils/travelTimeUtils';
 
 interface TravelIndicatorProps {
@@ -88,7 +88,7 @@ export function MealNudge({ mealType }: { mealType: string }) {
     <div className="inline-flex items-center gap-1.5 text-xs font-medium
                     bg-amber-500/8 border border-amber-500/15 text-amber-400/70
                     rounded-full px-3 py-1 my-1">
-      <span>🍽️</span>
+      <Utensils size={11} />
       <span>No {mealType} planned</span>
     </div>
   );

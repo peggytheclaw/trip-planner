@@ -3,7 +3,9 @@ import { motion } from 'framer-motion';
 import {
   Plane, Train, Clock, MapPin, Hash, DollarSign,
   CheckCircle, ChevronRight, Trash2, Edit3, Map,
+  Building2, Utensils, Star, Car, FileText,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import {
   TripEvent, FlightEvent, HotelEvent, RestaurantEvent,
   ActivityEvent, TransportEvent, TrainEvent, NoteEvent,
@@ -22,9 +24,14 @@ const TYPE_COLOR: Record<string, string> = {
   train:      '#f59e0b',
   note:       '#6b7280',
 };
-const TYPE_ICON: Record<string, string> = {
-  flight: '✈️', hotel: '🏨', restaurant: '🍽️',
-  activity: '🎯', transport: '🚗', train: '🚂', note: '📝',
+const TYPE_ICON_COMPONENT: Record<string, LucideIcon> = {
+  flight: Plane,
+  hotel: Building2,
+  restaurant: Utensils,
+  activity: Star,
+  transport: Car,
+  train: Train,
+  note: FileText,
 };
 const TYPE_LABEL: Record<string, string> = {
   flight: 'FLIGHT', hotel: 'HOTEL', restaurant: 'DINING',
@@ -130,10 +137,12 @@ export default function EventCard({ event, onEdit, onDelete, index = 0 }: EventC
 // ─── Shared sub-components ────────────────────────────────────────────────────
 
 function TypeBadge({ type, color }: { type: string; color: string }) {
+  const Icon = TYPE_ICON_COMPONENT[type];
   return (
-    <span className="text-[10px] font-black uppercase tracking-[0.15em]"
+    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.15em]"
       style={{ color: color + 'cc' }}>
-      {TYPE_ICON[type]} {TYPE_LABEL[type]}
+      {Icon && <Icon size={11} />}
+      {TYPE_LABEL[type]}
     </span>
   );
 }
@@ -304,7 +313,7 @@ function ActivityCard({ event, color }: { event: ActivityEvent; color: string })
       </DetailRow>
       {event.price !== undefined && (
         <div className="text-xs mt-1.5" style={{ color: 'var(--text-3)' }}>
-          {event.price === 0 ? '🆓 Free entry' : `$${event.price} per person`}
+          {event.price === 0 ? 'Free entry' : `$${event.price} per person`}
         </div>
       )}
       {event.bookingInfo && (
@@ -319,15 +328,13 @@ function ActivityCard({ event, color }: { event: ActivityEvent; color: string })
 
 // ─── Transport ────────────────────────────────────────────────────────────────
 function TransportCard({ event, color }: { event: TransportEvent; color: string }) {
-  const icons: Record<string, string> = {
-    car: '🚗', taxi: '🚕', bus: '🚌', subway: '🚇', ferry: '⛴️', other: '🚐',
-  };
   return (
     <div>
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-[10px] font-black uppercase tracking-[0.15em]"
+        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.15em]"
           style={{ color: color + 'cc' }}>
-          {icons[event.transportType]} {event.transportType.toUpperCase()}
+          <Car size={11} />
+          {event.transportType.toUpperCase()}
         </span>
         {event.provider && <span className="text-xs" style={{ color: 'var(--text-3)' }}>{event.provider}</span>}
       </div>

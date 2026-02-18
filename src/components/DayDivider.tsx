@@ -1,4 +1,5 @@
 import React from 'react';
+import { Moon } from 'lucide-react';
 import { TripEvent } from '../types';
 import DayMap from './DayMap';
 
@@ -37,7 +38,8 @@ export default function DayDivider({ label, date: _date, hotelName, events = [] 
       {/* Staying at hotel indicator */}
       {hotelName && (
         <div className="flex items-center justify-center gap-1.5 py-1">
-          <span className="text-xs font-medium" style={{ color: '#8b5cf6' }}>🌙 Staying at {hotelName}</span>
+          <Moon size={11} style={{ color: '#8b5cf6' }} />
+          <span className="text-xs font-medium" style={{ color: '#8b5cf6' }}>Staying at {hotelName}</span>
         </div>
       )}
     </div>

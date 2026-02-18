@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Plus, X, Check, DollarSign,
+  Utensils, Car, Building2, Star, Package,
+  Receipt, Scale, BarChart2, Wallet,
 } from 'lucide-react';
 import { useTripStore } from '../store/tripStore';
 import { useExpenseStore } from '../store/expenseStore';
@@ -12,11 +14,11 @@ import ExpenseItem from '../components/ExpenseItem';
 import { toast } from '../components/Toast';
 
 const CATEGORY_OPTIONS = [
-  { value: 'food',       label: '🍽️ Food & Dining' },
-  { value: 'transport',  label: '🚗 Transport' },
-  { value: 'hotel',      label: '🏨 Accommodation' },
-  { value: 'activities', label: '🎯 Activities' },
-  { value: 'other',      label: '📦 Other' },
+  { value: 'food',       label: 'Food & Dining' },
+  { value: 'transport',  label: 'Transport' },
+  { value: 'hotel',      label: 'Accommodation' },
+  { value: 'activities', label: 'Activities' },
+  { value: 'other',      label: 'Other' },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -160,20 +162,20 @@ export default function Expenses() {
           {/* Tabs */}
           <div className="flex gap-1 mt-3 p-1 rounded-xl" style={{ backgroundColor: '#141414' }}>
             {([
-              { id: 'expenses', label: '🧾 Expenses' },
-              { id: 'settle',   label: '⚖️ Settle Up' },
-              { id: 'summary',  label: '📊 Summary' },
+              { id: 'expenses', label: 'Expenses',  Icon: Receipt },
+              { id: 'settle',   label: 'Settle Up', Icon: Scale },
+              { id: 'summary',  label: 'Summary',   Icon: BarChart2 },
             ] as const).map(t => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className="flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all"
+                className="flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1"
                 style={{
                   backgroundColor: tab === t.id ? '#10b981' : 'transparent',
                   color: tab === t.id ? '#ffffff' : '#6b7280',
                 }}
               >
-                {t.label}
+                <t.Icon size={11} />{t.label}
               </button>
             ))}
           </div>
@@ -196,7 +198,7 @@ export default function Expenses() {
           <div className="space-y-3">
             {expenses.length === 0 ? (
               <div className="text-center py-16">
-                <div className="text-5xl mb-4">💸</div>
+                <div className="mb-4 flex justify-center"><Wallet size={48} style={{ color: '#4b5563' }} /></div>
                 <h3 className="font-semibold mb-1 text-white">No expenses yet</h3>
                 <p className="text-sm mb-5" style={{ color: '#6b7280' }}>Track spending and split costs with your travel crew</p>
                 <button
@@ -267,7 +269,7 @@ export default function Expenses() {
               {settlements.length === 0 ? (
                 <div className="rounded-xl p-4 text-center"
                   style={{ backgroundColor: '#0a1a0a', border: '1px solid #10b98130' }}>
-                  <div className="text-2xl mb-1">✅</div>
+                  <div className="mb-1 flex justify-center"><Check size={24} style={{ color: '#10b981' }} /></div>
                   <div className="text-sm font-semibold" style={{ color: '#10b981' }}>All settled up!</div>
                 </div>
               ) : (

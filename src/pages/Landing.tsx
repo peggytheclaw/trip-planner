@@ -4,6 +4,7 @@ import { motion, useInView, AnimatePresence } from 'framer-motion';
 import {
   Plane, Users, DollarSign, Share2, Zap, MapPin, Clock, Star,
   ArrowRight, Check, ChevronDown, Globe, Sparkles, Shield,
+  Building2, Utensils, PartyPopper,
 } from 'lucide-react';
 import { useWaitlistStore } from '../store/waitlistStore';
 import { useTripStore } from '../store/tripStore';
@@ -37,19 +38,19 @@ function AnimatedCount({ target, suffix = '' }: { target: number; suffix?: strin
 function MockPhone() {
   const cards = [
     {
-      type: 'flight', icon: '✈️', color: '#3B82F6', bg: '#EFF6FF',
+      type: 'flight', Icon: Plane, color: '#3B82F6', bg: '#EFF6FF',
       title: 'SFO → NRT', sub: 'United UA837 · 10h 45m', time: '11:30 AM',
     },
     {
-      type: 'hotel', icon: '🏨', color: '#8B5CF6', bg: '#F5F3FF',
+      type: 'hotel', Icon: Building2, color: '#8B5CF6', bg: '#F5F3FF',
       title: 'Park Hyatt Tokyo', sub: 'Check-in 3:00pm · Shinjuku', time: 'MAR 16',
     },
     {
-      type: 'activity', icon: '🎯', color: '#10B981', bg: '#ECFDF5',
+      type: 'activity', Icon: Star, color: '#10B981', bg: '#ECFDF5',
       title: 'teamLab Planets', sub: 'Toyosu · $32 per person', time: '11:00 AM',
     },
     {
-      type: 'restaurant', icon: '🍜', color: '#F97316', bg: '#FFF7ED',
+      type: 'restaurant', Icon: Utensils, color: '#F97316', bg: '#FFF7ED',
       title: 'Ichiran Ramen', sub: 'Shinjuku · Reservation ✓', time: '7:30 PM',
     },
   ];
@@ -115,9 +116,9 @@ function MockPhone() {
                 style={{ borderLeft: `3px solid ${card.color}` }}
               >
                 <div className="p-2.5 flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0"
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: card.bg }}>
-                    {card.icon}
+                    <card.Icon size={16} style={{ color: card.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-gray-900 text-xs leading-tight truncate">{card.title}</div>
@@ -565,19 +566,22 @@ export default function Landing() {
             {[
               {
                 step: '01',
-                icon: '✈️',
+                Icon: Plane,
+                color: '#3B82F6',
                 title: 'Pick a destination',
                 body: 'Start from scratch or fork a community template. Tokyo, NYC, Bali — we have starter trips for the most popular destinations.',
               },
               {
                 step: '02',
-                icon: '👥',
+                Icon: Users,
+                color: '#10B981',
                 title: 'Invite your crew',
                 body: 'Share one link. Everyone can add events, vote on restaurants, and see each other\'s ideas — live, in real-time.',
               },
               {
                 step: '03',
-                icon: '🎉',
+                Icon: PartyPopper,
+                color: '#F97316',
                 title: 'Travel & settle up',
                 body: 'Track expenses as you go. When you get home, one tap shows exactly who owes what. No spreadsheets. No drama.',
               },
@@ -595,7 +599,10 @@ export default function Landing() {
                   style={{ color: 'rgba(255,255,255,0.04)' }}>
                   {step.step}
                 </div>
-                <div className="text-4xl mb-4">{step.icon}</div>
+                <div className="mb-4 w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: step.color + '18' }}>
+                  <step.Icon size={24} style={{ color: step.color }} />
+                </div>
                 <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--text)' }}>{step.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--text-3)' }}>{step.body}</p>
               </motion.div>
@@ -776,7 +783,11 @@ export default function Landing() {
             backgroundSize: '60px 60px',
           }} />
         <div className="max-w-2xl mx-auto px-5 text-center relative z-10">
-          <div className="text-5xl mb-5">✈️</div>
+          <div className="mb-5 flex justify-center">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <Plane size={32} className="text-white" />
+            </div>
+          </div>
           <h2 className="text-4xl font-black text-white mb-4 leading-tight">
             Your next adventure<br />starts here.
           </h2>

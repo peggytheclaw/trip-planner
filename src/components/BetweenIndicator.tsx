@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, AlertTriangle } from 'lucide-react';
+import { Plus, AlertTriangle, Utensils, Moon } from 'lucide-react';
 import { TripEvent } from '../types';
 import { getTravelTime, inferTravelMode, hasLargeTimeGap, TRAVEL_MODE_EMOJI } from '../utils/mapUtils';
 
@@ -69,16 +69,16 @@ export default function BetweenIndicator({ type, label, onAdd, showAdd, fromEven
             className="text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
             style={{ backgroundColor: '#1a1200', color: '#eab308', border: '1px solid #2a2000' }}
           >
-            🍽️ {label ?? 'No meal planned!'}
+            <Utensils size={11} /> {label ?? 'No meal planned!'}
           </span>
         );
       case 'overnight':
         return (
           <span
-            className="text-xs font-medium px-3 py-1 rounded-full"
+            className="text-xs font-medium px-3 py-1 rounded-full flex items-center gap-1"
             style={{ backgroundColor: '#0f0a1a', color: '#8b5cf6', border: '1px solid #1a1030' }}
           >
-            🌙 {label}
+            <Moon size={11} /> {label}
           </span>
         );
       case 'free':
