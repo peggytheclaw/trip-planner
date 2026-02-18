@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Share2, DollarSign, Settings, Plus, Check,
-  Copy, X, Eye, Map, ClipboardList,
+  Copy, X, Eye, Map, ClipboardList, Sparkles,
 } from 'lucide-react';
+import { AIAgentPanel } from '../components/AIAgentPanel';
 import { useTripStore } from '../store/tripStore';
 import { groupEventsByDay, getActiveHotel, detectMealGap } from '../utils/itineraryUtils';
 import { EVENT_COORDS } from '../utils/eventCoordinates';
@@ -29,6 +30,7 @@ export default function Itinerary() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [expandedDayMaps, setExpandedDayMaps] = useState<Set<string>>(new Set());
+  const [aiOpen, setAiOpen] = useState(false);
 
   useEffect(() => {
     if (trip) setCurrentTrip(trip.id);
@@ -308,7 +310,20 @@ export default function Itinerary() {
         )}
       </div>
 
-      {/* ── FAB ─────────────────────────────────────────────────────────────── */}
+      {/* ── FABs ────────────────────────────────────────────────────────────── */}
+      {/* AI Agent FAB */}
+      <motion.button
+        onClick={() => setAiOpen(true)}
+        className="fixed bottom-24 right-4 z-30 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
+        style={{ background: 'var(--accent)', boxShadow: '0 4px 20px var(--accent-glow)' }}
+        whileTap={{ scale: 0.88 }}
+        whileHover={{ scale: 1.06 }}
+        title="AI Travel Assistant"
+      >
+        <Sparkles size={20} color="#fff" />
+      </motion.button>
+
+      {/* Add Event FAB */}
       <div className="fixed bottom-6 right-4 z-30">
         <motion.button
           onClick={() => handleOpenAdd()}
@@ -320,6 +335,13 @@ export default function Itinerary() {
           <Plus size={24} />
         </motion.button>
       </div>
+
+      {/* AI Agent Panel */}
+      <AIAgentPanel
+        isOpen={aiOpen}
+        onClose={() => setAiOpen(false)}
+        trip={trip}
+      />
 
       {/* ── ADD/EDIT SHEET ───────────────────────────────────────────────────── */}
       <AddEventSheet
