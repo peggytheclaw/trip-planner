@@ -95,7 +95,7 @@ export default function Itinerary() {
 
       {/* ── HEADER ──────────────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-20" style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
-        <div className="max-w-xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           {/* Trip cover strip */}
           <div
             className="px-4 pt-4 pb-3 relative"
@@ -160,7 +160,8 @@ export default function Itinerary() {
       </div>
 
       {/* ── TIMELINE ────────────────────────────────────────────────────────── */}
-      <div className="max-w-xl mx-auto px-4 py-5 pb-28">
+      <div className="max-w-6xl mx-auto md:flex md:gap-8 md:px-8 md:py-6">
+      <div className="flex-1 min-w-0 px-4 py-5 pb-28 md:px-0 md:max-w-2xl">
         {dayGroups.length === 0 ? (
           <div className="text-center py-20">
             <div className="mb-4 flex justify-center"><ClipboardList size={48} style={{ color: 'var(--text-3)' }} /></div>
@@ -308,6 +309,31 @@ export default function Itinerary() {
             );
           })
         )}
+      </div>
+
+      {/* ── Desktop right column: sticky AI panel hint ── */}
+      <div className="hidden md:flex flex-col w-80 shrink-0 pt-5">
+        <div
+          className="sticky top-24 rounded-2xl p-5 text-center"
+          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+        >
+          <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3"
+            style={{ background: 'rgba(16,185,129,0.15)' }}>
+            <Sparkles size={20} style={{ color: 'var(--accent)' }} />
+          </div>
+          <h3 className="font-bold mb-1" style={{ color: 'var(--text)' }}>AI Travel Assistant</h3>
+          <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-3)' }}>
+            Let AI help you plan days, add restaurants, or suggest activities for {trip.destination}.
+          </p>
+          <button
+            onClick={() => setAiOpen(true)}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ background: 'var(--accent)' }}
+          >
+            Open AI Assistant
+          </button>
+        </div>
+      </div>
       </div>
 
       {/* ── FABs ────────────────────────────────────────────────────────────── */}

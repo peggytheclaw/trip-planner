@@ -19,6 +19,7 @@ export interface BaseEvent {
   endDate?: string;    // ISO date string (if spans multiple days)
   title: string;
   notes?: string;
+  description?: string; // prose paragraph for travel guide feel
   createdBy?: string;  // traveler id
   createdAt: string;   // ISO datetime
   lat?: number;        // latitude for map display
@@ -46,6 +47,7 @@ export interface HotelEvent extends BaseEvent {
   type: 'hotel';
   hotelName: string;
   neighborhood?: string;
+  neighborhoodDescription?: string; // e.g. "Vibrant arts district, 5min walk to Shibuya Crossing"
   address?: string;
   checkInTime: string;
   checkOutDate: string;
@@ -67,6 +69,7 @@ export interface RestaurantEvent extends BaseEvent {
   address?: string;
   duration?: string; // "1h 30m"
   price?: string;    // "$$$"
+  whatToTry?: string; // e.g. "Try the omakase — chef's seasonal selection is the move"
 }
 
 export interface ActivityEvent extends BaseEvent {
@@ -77,6 +80,7 @@ export interface ActivityEvent extends BaseEvent {
   price?: number;
   bookingInfo?: string;
   category?: string;
+  coverPhoto?: string; // URL for hero image at top of card
 }
 
 export interface TransportEvent extends BaseEvent {

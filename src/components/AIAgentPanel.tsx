@@ -6,6 +6,16 @@ import { useTripStore } from '../store/tripStore'
 import { Trip } from '../types'
 import { toast } from './Toast'
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return isDesktop;
+}
+
 interface AIAgentPanelProps {
   isOpen: boolean
   onClose: () => void
@@ -34,6 +44,7 @@ export function AIAgentPanel({ isOpen, onClose, trip }: AIAgentPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const { addEvent, updateEvent, deleteEvent } = useTripStore()
+  const isDesktop = useIsDesktop()
 
   useEffect(() => {
     if (isOpen) {
@@ -107,34 +118,8 @@ export function AIAgentPanel({ isOpen, onClose, trip }: AIAgentPanelProps) {
     }
   }
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 z-40"
-            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-            onClick={onClose}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          />
-
-          {/* Panel */}
-          <motion.div
-            className="fixed bottom-0 left-0 right-0 z-50 flex flex-col"
-            style={{
-              background: 'var(--bg-elevated)',
-              borderTop: '1px solid var(--border)',
-              borderRadius: '16px 16px 0 0',
-              maxHeight: '75vh',
-            }}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-          >
+  const panelContent = (
+    <>
             {/* Header */}
             <div
               className="flex items-center justify-between px-4 py-3"
@@ -254,9 +239,60 @@ export function AIAgentPanel({ isOpen, onClose, trip }: AIAgentPanelProps) {
                 </button>
               </div>
             </div>
-          </motion.div>
+    </>
+  )
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            className="fixed inset-0 z-40"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+
+          {isDesktop ? (
+            /* ── Desktop: right-side drawer ── */
+            <motion.div
+              className="fixed right-0 top-0 bottom-0 z-50 flex flex-col"
+              style={{
+                width: 400,
+                background: 'var(--bg-elevated)',
+                borderLeft: '1px solid var(--border)',
+              }}
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            >
+              {panelContent}
+            </motion.div>
+          ) : (
+            /* ── Mobile: bottom slide-up panel ── */
+            <motion.div
+              className="fixed bottom-0 left-0 right-0 z-50 flex flex-col"
+              style={{
+                background: 'var(--bg-elevated)',
+                borderTop: '1px solid var(--border)',
+                borderRadius: '16px 16px 0 0',
+                maxHeight: '75vh',
+              }}
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            >
+              {panelContent}
+            </motion.div>
+          )}
         </>
       )}
     </AnimatePresence>
   )
 }
+// END

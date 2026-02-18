@@ -54,9 +54,15 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, onEdit, onDelete, index = 0 }: EventCardProps) {
-  const [showMap, setShowMap] = useState(false);
   const color = TYPE_COLOR[event.type] ?? '#6b7280';
   const coords = EVENT_COORDS[event.id];
+
+  // Auto-show map for restaurants and activities that have coords
+  const autoShowMap = coords && (event.type === 'restaurant' || event.type === 'activity');
+  const [showMap, setShowMap] = useState(!!autoShowMap);
+
+  // Activity cover photo
+  const coverPhoto = event.type === 'activity' ? (event as ActivityEvent).coverPhoto : undefined;
 
   return (
     <motion.div
@@ -71,6 +77,26 @@ export default function EventCard({ event, onEdit, onDelete, index = 0 }: EventC
         borderLeft: `3px solid ${color}`,
       }}
     >
+      {/* Activity hero image — full width at top */}
+      {coverPhoto && (
+        <div className="relative w-full overflow-hidden" style={{ height: 120 }}>
+          <img
+            src={coverPhoto}
+            alt=""
+            className="w-full h-full object-cover"
+            style={{ borderRadius: '0' }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+          {/* Gradient overlay — dark at bottom */}
+          <div
+            className="absolute inset-0"
+            style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.55) 100%)' }}
+          />
+        </div>
+      )}
+
       {/* Action buttons — always visible (small on mobile, larger on hover/desktop) */}
       <div className="absolute top-3 right-3 flex gap-1 z-10">
         {coords && (
@@ -114,19 +140,29 @@ export default function EventCard({ event, onEdit, onDelete, index = 0 }: EventC
         {event.type === 'transport'  && <TransportCard event={event as TransportEvent}  color={color} />}
         {event.type === 'train'      && <TrainCard     event={event as TrainEvent}      color={color} />}
         {event.type === 'note'       && <NoteCard      event={event as NoteEvent}       color={color} />}
+
+        {/* Description — shared across all types */}
+        {event.description && (
+          <p
+            className="text-sm leading-relaxed mt-3"
+            style={{ color: 'var(--text-3)', fontStyle: 'italic' }}
+          >
+            {event.description}
+          </p>
+        )}
       </div>
 
-      {/* Collapsible mini map */}
+      {/* Mini map — auto-shown for restaurant/activity, toggled for others */}
       {showMap && coords && (
         <motion.div
           initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 140, opacity: 1 }}
+          animate={{ height: 116, opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.25 }}
           className="overflow-hidden"
         >
           <div className="px-4 pb-4">
-            <MiniMap lat={coords[0]} lng={coords[1]} zoom={14} height={120} />
+            <MiniMap lat={coords[0]} lng={coords[1]} zoom={14} height={100} />
           </div>
         </motion.div>
       )}
@@ -234,10 +270,15 @@ function HotelCard({ event, color }: { event: HotelEvent; color: string }) {
         {event.hotelName}
       </div>
       {event.neighborhood && (
-        <div className="flex items-center gap-1 text-sm mb-2" style={{ color: 'var(--text-3)' }}>
+        <div className="flex items-center gap-1 text-sm mb-1" style={{ color: 'var(--text-3)' }}>
           <MapPin size={12} />
           {event.neighborhood}
         </div>
+      )}
+      {event.neighborhoodDescription && (
+        <p className="text-xs mb-2 leading-snug" style={{ color: 'var(--text-3)', fontStyle: 'italic' }}>
+          {event.neighborhoodDescription}
+        </p>
       )}
       <div className="grid grid-cols-3 gap-2 mt-2">
         {[
@@ -285,6 +326,18 @@ function RestaurantCard({ event, color }: { event: RestaurantEvent; color: strin
         <div className="flex items-center gap-1.5 mt-2 text-xs font-semibold" style={{ color: '#10b981' }}>
           <CheckCircle size={11} />
           Reservation confirmed
+        </div>
+      )}
+      {/* What to try callout */}
+      {event.whatToTry && (
+        <div
+          className="mt-3 flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs leading-relaxed"
+          style={{ background: `rgba(249,115,22,0.1)`, border: '1px solid rgba(249,115,22,0.2)' }}
+        >
+          <span className="shrink-0 mt-0.5">🍴</span>
+          <span style={{ color: '#fb923c' }}>
+            <strong>Try the</strong> {event.whatToTry.replace(/^try the\s+/i, '')}
+          </span>
         </div>
       )}
     </div>

@@ -5,6 +5,16 @@ import { EventType, TripEvent, Traveler } from '../types';
 import { EVENT_ICONS, EVENT_LABELS } from '../utils/itineraryUtils';
 import { toast } from './Toast';
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
+  useEffect(() => {
+    const handler = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+  return isDesktop;
+}
+
 interface AddEventSheetProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,6 +32,7 @@ export default function AddEventSheet({
   const [eventType, setEventType] = useState<EventType>('activity');
   const [formData, setFormData] = useState<Record<string, any>>({});
   const firstInputRef = useRef<HTMLInputElement | null>(null);
+  const isDesktop = useIsDesktop();
 
   // Reset form whenever sheet opens or editEvent changes
   useEffect(() => {
@@ -66,6 +77,113 @@ export default function AddEventSheet({
     onClose();
   };
 
+  // Shared inner content
+  const sheetContent = (
+    <>
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid #242424' }}>
+        <h2 className="text-lg font-bold text-white">
+          {editEvent ? 'Edit Event' : 'Add Event'}
+        </h2>
+        <button
+          onClick={onClose}
+          className="w-8 h-8 rounded-full flex items-center justify-center"
+          style={{ backgroundColor: '#1a1a1a', color: '#9ca3af' }}
+        >
+          <X size={16} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+        {/* Event Type Selector */}
+        {!editEvent && (
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: '#6b7280' }}>
+              Event Type
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {EVENT_TYPES.map(type => {
+                const selected = eventType === type;
+                return (
+                  <button
+                    key={type}
+                    onClick={() => setEventType(type)}
+                    className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all"
+                    style={{
+                      border: `2px solid ${selected ? '#10b981' : '#242424'}`,
+                      backgroundColor: selected ? '#10b98120' : '#1a1a1a',
+                    }}
+                  >
+                    <span className="text-xl">{EVENT_ICONS[type]}</span>
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: selected ? '#10b981' : '#6b7280' }}
+                    >
+                      {EVENT_LABELS[type]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Date & Time */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>Date</label>
+            <input
+              type="date"
+              value={formData.date ?? ''}
+              onChange={e => update('date', e.target.value)}
+              className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white"
+              style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', colorScheme: 'dark' }}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>Time</label>
+            <input
+              type="time"
+              value={formData.time ?? ''}
+              onChange={e => update('time', e.target.value)}
+              className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white"
+              style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', colorScheme: 'dark' }}
+            />
+          </div>
+        </div>
+
+        {/* Dynamic form fields */}
+        <EventForm eventType={eventType} formData={formData} update={update} travelers={travelers} firstInputRef={firstInputRef} />
+
+        {/* Notes */}
+        <div>
+          <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>Notes</label>
+          <textarea
+            value={formData.notes ?? ''}
+            onChange={e => update('notes', e.target.value)}
+            placeholder="Any additional info..."
+            rows={2}
+            className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white resize-none"
+            style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}
+          />
+        </div>
+      </div>
+
+      {/* Save Button */}
+      <div className="px-5 py-4" style={{ borderTop: '1px solid #242424' }}>
+        <button
+          onClick={handleSave}
+          className="w-full py-3.5 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: '#10b981' }}
+        >
+          <Save size={16} />
+          Save to Itinerary
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -73,129 +191,48 @@ export default function AddEventSheet({
           {/* Backdrop */}
           <motion.div
             className="fixed inset-0 z-40"
-            style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+            style={{ backgroundColor: isDesktop ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.6)', backdropFilter: isDesktop ? 'blur(4px)' : 'none' }}
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           />
 
-          {/* Sheet */}
-          <motion.div
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl shadow-2xl max-h-[92vh] flex flex-col"
-            style={{ backgroundColor: '#141414', border: '1px solid #2a2a2a' }}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          >
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full" style={{ backgroundColor: '#2a2a2a' }} />
-            </div>
-
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: '1px solid #242424' }}>
-              <h2 className="text-lg font-bold text-white">
-                {editEvent ? 'Edit Event' : 'Add Event'}
-              </h2>
-              <button
-                onClick={onClose}
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: '#1a1a1a', color: '#9ca3af' }}
+          {isDesktop ? (
+            /* ── Desktop: centered modal ── */
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+              <motion.div
+                className="pointer-events-auto w-full max-h-[85vh] flex flex-col rounded-3xl shadow-2xl"
+                style={{
+                  maxWidth: 640,
+                  backgroundColor: '#141414',
+                  border: '1px solid #2a2a2a',
+                }}
+                initial={{ opacity: 0, scale: 0.95, y: 8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 8 }}
+                transition={{ type: 'spring', damping: 30, stiffness: 380 }}
               >
-                <X size={16} />
-              </button>
+                {sheetContent}
+              </motion.div>
             </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-              {/* Event Type Selector */}
-              {!editEvent && (
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: '#6b7280' }}>
-                    Event Type
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {EVENT_TYPES.map(type => {
-                      const selected = eventType === type;
-                      return (
-                        <button
-                          key={type}
-                          onClick={() => setEventType(type)}
-                          className="flex flex-col items-center gap-1 py-2 px-1 rounded-xl transition-all"
-                          style={{
-                            border: `2px solid ${selected ? '#10b981' : '#242424'}`,
-                            backgroundColor: selected ? '#10b98120' : '#1a1a1a',
-                          }}
-                        >
-                          <span className="text-xl">{EVENT_ICONS[type]}</span>
-                          <span
-                            className="text-xs font-medium"
-                            style={{ color: selected ? '#10b981' : '#6b7280' }}
-                          >
-                            {EVENT_LABELS[type]}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Date & Time */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>Date</label>
-                  <input
-                    type="date"
-                    value={formData.date ?? ''}
-                    onChange={e => update('date', e.target.value)}
-                    className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white"
-                    style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', colorScheme: 'dark' }}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>Time</label>
-                  <input
-                    type="time"
-                    value={formData.time ?? ''}
-                    onChange={e => update('time', e.target.value)}
-                    className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white"
-                    style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a', colorScheme: 'dark' }}
-                  />
-                </div>
+          ) : (
+            /* ── Mobile: bottom sheet ── */
+            <motion.div
+              className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl shadow-2xl max-h-[92vh] flex flex-col"
+              style={{ backgroundColor: '#141414', border: '1px solid #2a2a2a' }}
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            >
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full" style={{ backgroundColor: '#2a2a2a' }} />
               </div>
-
-              {/* Dynamic form fields */}
-              <EventForm eventType={eventType} formData={formData} update={update} travelers={travelers} firstInputRef={firstInputRef} />
-
-              {/* Notes */}
-              <div>
-                <label className="text-xs font-semibold uppercase tracking-wider mb-1 block" style={{ color: '#6b7280' }}>Notes</label>
-                <textarea
-                  value={formData.notes ?? ''}
-                  onChange={e => update('notes', e.target.value)}
-                  placeholder="Any additional info..."
-                  rows={2}
-                  className="w-full rounded-xl px-3 py-2.5 text-sm outline-none text-white resize-none"
-                  style={{ backgroundColor: '#1e1e1e', border: '1px solid #2a2a2a' }}
-                />
-              </div>
-            </div>
-
-            {/* Save Button */}
-            <div className="px-5 py-4 safe-bottom" style={{ borderTop: '1px solid #242424' }}>
-              <button
-                onClick={handleSave}
-                className="w-full py-3.5 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: '#10b981' }}
-              >
-                <Save size={16} />
-                Save to Itinerary
-              </button>
-            </div>
-          </motion.div>
+              {sheetContent}
+            </motion.div>
+          )}
         </>
       )}
     </AnimatePresence>
