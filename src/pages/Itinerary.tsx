@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Share2, DollarSign, Settings, Plus, Check,
-  Copy, X, Eye, Map, ClipboardList, Sparkles,
+  Copy, X, Eye, Map, ClipboardList, Sparkles, Lightbulb,
 } from 'lucide-react';
 import { AIAgentPanel } from '../components/AIAgentPanel';
 import { useTripStore } from '../store/tripStore';
@@ -17,13 +17,18 @@ import CollabAvatars from '../components/CollabAvatars';
 import TravelIndicator, { OvernightIndicator, MealNudge } from '../components/TravelIndicator';
 import { DayMap } from '../components/MiniMap';
 import { toast } from '../components/Toast';
+import IdeaBankPanel from '../components/IdeaBankPanel';
 
 export default function Itinerary() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
-  const { getTripById, addEvent, updateEvent, deleteEvent, setCurrentTrip } = useTripStore();
+  const {
+    getTripById, addEvent, updateEvent, deleteEvent, setCurrentTrip,
+    addIdeaToBank, promoteIdeaToItinerary, updateIdea, deleteIdea,
+  } = useTripStore();
 
   const trip = getTripById(tripId!);
+  const [view, setView] = useState<'itinerary' | 'ideas'>('itinerary');
   const [addSheetOpen, setAddSheetOpen] = useState(false);
   const [editEvent, setEditEvent] = useState<TripEvent | null>(null);
   const [insertDate, setInsertDate] = useState<string | undefined>();
@@ -31,6 +36,7 @@ export default function Itinerary() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [expandedDayMaps, setExpandedDayMaps] = useState<Set<string>>(new Set());
   const [aiOpen, setAiOpen] = useState(false);
+  const [isAddingIdea, setIsAddingIdea] = useState(false);
 
   useEffect(() => {
     if (trip) setCurrentTrip(trip.id);
@@ -57,10 +63,23 @@ export default function Itinerary() {
   };
 
   const handleSaveEvent = (eventData: Omit<TripEvent, 'id' | 'createdAt'>) => {
-    if (editEvent) updateEvent(trip.id, editEvent.id, eventData);
-    else addEvent(trip.id, eventData);
+    if (isAddingIdea) {
+      // Adding to idea bank
+      if (editEvent) {
+        // Editing existing idea
+        updateIdea(trip.id, editEvent.id, eventData);
+      } else {
+        // Adding new idea
+        addIdeaToBank(trip.id, eventData);
+      }
+    } else {
+      // Adding to itinerary
+      if (editEvent) updateEvent(trip.id, editEvent.id, eventData);
+      else addEvent(trip.id, eventData);
+    }
     setEditEvent(null);
     setInsertDate(undefined);
+    setIsAddingIdea(false);
   };
 
   const handleOpenAdd = (date?: string) => {
@@ -159,9 +178,74 @@ export default function Itinerary() {
         </div>
       </div>
 
-      {/* ── TIMELINE ────────────────────────────────────────────────────────── */}
-      <div className="max-w-6xl mx-auto md:flex md:gap-8 md:px-8 md:py-6">
-      <div className="flex-1 min-w-0 px-4 py-5 pb-28 md:px-0 md:max-w-2xl">
+      {/* ── VIEW TABS ────────────────────────────────────────────────────────── */}
+      <div className="sticky top-0 z-20" style={{ backgroundColor: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setView('itinerary')}
+              className="flex items-center gap-2 px-4 py-3 font-semibold text-sm transition-all"
+              style={{
+                color: view === 'itinerary' ? 'var(--text)' : 'var(--text-3)',
+                borderBottom: view === 'itinerary' ? '2px solid var(--accent)' : '2px solid transparent',
+              }}
+            >
+              <ClipboardList size={16} />
+              Itinerary
+            </button>
+            <button
+              onClick={() => setView('ideas')}
+              className="flex items-center gap-2 px-4 py-3 font-semibold text-sm transition-all"
+              style={{
+                color: view === 'ideas' ? 'var(--text)' : 'var(--text-3)',
+                borderBottom: view === 'ideas' ? '2px solid #f59e0b' : '2px solid transparent',
+              }}
+            >
+              <Lightbulb size={16} />
+              Ideas
+              {trip.ideaBank && trip.ideaBank.length > 0 && (
+                <span
+                  className="text-xs font-bold px-1.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: '#f59e0b', color: 'white' }}
+                >
+                  {trip.ideaBank.length}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── CONTENT ────────────────────────────────────────────────────────── */}
+      {view === 'ideas' ? (
+        <IdeaBankPanel
+          ideas={trip.ideaBank || []}
+          travelers={trip.travelers}
+          onAddIdea={() => {
+            setIsAddingIdea(true);
+            setEditEvent(null);
+            setAddSheetOpen(true);
+          }}
+          onAddToItinerary={(ideaId, date) => {
+            promoteIdeaToItinerary(trip.id, ideaId, date);
+            toast.success('Added to itinerary!');
+          }}
+          onEditIdea={(idea) => {
+            setIsAddingIdea(true);
+            setEditEvent(idea);
+            setAddSheetOpen(true);
+          }}
+          onDeleteIdea={(ideaId) => {
+            if (confirm('Delete this idea?')) {
+              deleteIdea(trip.id, ideaId);
+            }
+          }}
+        />
+      ) : (
+        <>
+          {/* ── TIMELINE ────────────────────────────────────────────────────────── */}
+          <div className="max-w-6xl mx-auto md:flex md:gap-8 md:px-8 md:py-6">
+          <div className="flex-1 min-w-0 px-4 py-5 pb-28 md:px-0 md:max-w-2xl">
         {dayGroups.length === 0 ? (
           <div className="text-center py-20">
             <div className="mb-4 flex justify-center"><ClipboardList size={48} style={{ color: 'var(--text-3)' }} /></div>
@@ -362,6 +446,8 @@ export default function Itinerary() {
           <Plus size={24} />
         </motion.button>
       </div>
+        </>
+      )}
 
       {/* AI Agent Panel */}
       <AIAgentPanel

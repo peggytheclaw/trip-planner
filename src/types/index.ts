@@ -173,6 +173,7 @@ export interface Trip {
   coverGradient?: string; // CSS gradient for card
   travelers: Traveler[];
   events: TripEvent[];
+  ideaBank?: TripEvent[]; // unscheduled ideas — research phase before arranging into timeline
   createdAt: string;
   updatedAt: string;
   // ── v2 additions ─────────────────────────────────────

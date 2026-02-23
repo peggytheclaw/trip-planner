@@ -83,6 +83,12 @@ interface TripStore {
   updateEvent: (tripId: string, eventId: string, updates: Partial<TripEvent>) => Promise<void>;
   deleteEvent: (tripId: string, eventId: string) => Promise<void>;
 
+  // Idea Bank actions
+  addIdeaToBank: (tripId: string, idea: Omit<TripEvent, 'id' | 'createdAt'>) => Promise<TripEvent>;
+  promoteIdeaToItinerary: (tripId: string, ideaId: string, date: string) => Promise<void>;
+  updateIdea: (tripId: string, ideaId: string, updates: Partial<TripEvent>) => Promise<void>;
+  deleteIdea: (tripId: string, ideaId: string) => Promise<void>;
+
   // Traveler actions
   addTraveler: (tripId: string, traveler: Omit<Traveler, 'id'>) => Promise<void>;
   updateTraveler: (tripId: string, travelerId: string, updates: Partial<Traveler>) => Promise<void>;
@@ -312,6 +318,81 @@ export const useTripStore = create<TripStore>((set, get) => ({
 
     const { error } = await supabase.from('events').delete().eq('id', eventId);
     if (error) console.error('deleteEvent error:', error);
+  },
+
+  // ── Idea Bank ──────────────────────────────────────────────────────────────
+
+  addIdeaToBank: async (tripId, ideaData) => {
+    // Create idea with a placeholder date (won't be shown in timeline)
+    const idea = {
+      ...ideaData,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+    } as TripEvent;
+
+    // Update local state immediately
+    set(state => ({
+      trips: state.trips.map(t =>
+        t.id === tripId
+          ? { ...t, ideaBank: [...(t.ideaBank || []), idea], updatedAt: new Date().toISOString() }
+          : t
+      ),
+    }));
+
+    // For now, ideas are stored in local state only (not in Supabase)
+    // TODO: Add ideaBank support to Supabase schema if needed for persistence
+    return idea;
+  },
+
+  promoteIdeaToItinerary: async (tripId, ideaId, date) => {
+    const trip = get().trips.find(t => t.id === tripId);
+    if (!trip) return;
+
+    const idea = trip.ideaBank?.find(i => i.id === ideaId);
+    if (!idea) return;
+
+    // Remove from idea bank
+    set(state => ({
+      trips: state.trips.map(t =>
+        t.id === tripId
+          ? { ...t, ideaBank: (t.ideaBank || []).filter(i => i.id !== ideaId) }
+          : t
+      ),
+    }));
+
+    // Add to itinerary with the specified date (remove old id and createdAt)
+    const { id, createdAt, ...eventData } = idea;
+    await get().addEvent(tripId, { ...eventData, date });
+  },
+
+  updateIdea: async (tripId, ideaId, updates) => {
+    set(state => ({
+      trips: state.trips.map(t =>
+        t.id === tripId
+          ? {
+              ...t,
+              ideaBank: (t.ideaBank || []).map(i =>
+                i.id === ideaId ? ({ ...i, ...updates } as TripEvent) : i
+              ),
+              updatedAt: new Date().toISOString(),
+            }
+          : t
+      ),
+    }));
+  },
+
+  deleteIdea: async (tripId, ideaId) => {
+    set(state => ({
+      trips: state.trips.map(t =>
+        t.id === tripId
+          ? {
+              ...t,
+              ideaBank: (t.ideaBank || []).filter(i => i.id !== ideaId),
+              updatedAt: new Date().toISOString(),
+            }
+          : t
+      ),
+    }));
   },
 
   // ── Travelers ──────────────────────────────────────────────────────────────
