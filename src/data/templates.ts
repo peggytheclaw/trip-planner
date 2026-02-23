@@ -1,6 +1,7 @@
 import { Trip } from '../types';
 import { sampleTrip } from './sampleTrip';
 import { amalfiTemplate, patagoniaTemplate, moroccoTemplate, icelandTemplate, thailandTemplate } from './moreTemplates';
+import { amalfiTemplate, patagoniaTemplate, moroccoTemplate, icelandTemplate, thailandTemplate } from './moreTemplates';
 
 export { amalfiTemplate, patagoniaTemplate, moroccoTemplate, icelandTemplate, thailandTemplate };
 

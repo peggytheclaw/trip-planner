@@ -41,6 +41,10 @@ export interface FlightEvent extends BaseEvent {
   confirmationNumber?: string;
   seatInfo?: string;
   cabin?: string;
+  // ── v2 additions ─────────────────────────────────────
+  stopover?: string;          // e.g. "via Doha (2h layover at DOH)"
+  baggageIncluded?: boolean;  // whether checked bag is included in fare
+  baggageFeeUSD?: number;     // cost if not included
 }
 
 export interface HotelEvent extends BaseEvent {
@@ -59,6 +63,11 @@ export interface HotelEvent extends BaseEvent {
   numRooms?: number;
   isCheckout?: boolean;  // true for the checkout card
   linkedEventId?: string; // links checkin/checkout pair
+  // ── v2 additions ─────────────────────────────────────
+  amenities?: string[];   // e.g. ["pool", "spa", "beach access", "rooftop bar", "free breakfast"]
+  vibe?: string;          // e.g. "bohemian riad", "mountain refugio", "cliffside boutique hotel"
+  hotelUrl?: string;      // booking/hotel website URL
+  starRating?: 1 | 2 | 3 | 4 | 5;  // official star rating
 }
 
 export interface RestaurantEvent extends BaseEvent {
@@ -70,6 +79,14 @@ export interface RestaurantEvent extends BaseEvent {
   duration?: string; // "1h 30m"
   price?: string;    // "$$$"
   whatToTry?: string; // e.g. "Try the omakase — chef's seasonal selection is the move"
+  // ── v2 additions ─────────────────────────────────────
+  mustOrderDish?: string;  // THE single dish you cannot skip
+  dressCode?: 'none' | 'casual' | 'smart-casual' | 'formal';
+  michelinStars?: 0 | 1 | 2 | 3;
+  reservationRequired?: boolean;
+  localFavourite?: boolean;  // off-the-tourist-trail gem
+  openTill?: string;         // "23:00" — useful for late-night planning
+  vegetarianFriendly?: boolean;
 }
 
 export interface ActivityEvent extends BaseEvent {
@@ -81,6 +98,14 @@ export interface ActivityEvent extends BaseEvent {
   bookingInfo?: string;
   category?: string;
   coverPhoto?: string; // URL for hero image at top of card
+  // ── v2 additions ─────────────────────────────────────
+  physicalRating?: 1 | 2 | 3 | 4 | 5;
+  // ^ 1=gentle/seated, 2=easy walk, 3=moderate hike, 4=strenuous, 5=extreme/expedition
+  minAge?: number;              // minimum age recommendation (e.g. 8 for certain hikes)
+  indoorOutdoor?: 'indoor' | 'outdoor' | 'both';
+  mustSee?: boolean;            // marquee experience — the one you can't skip
+  tipFromLocals?: string;       // insider knowledge that changes the experience
+  vibes?: string[];             // e.g. ['romantic', 'adventurous', 'photography', 'family']
 }
 
 export interface TransportEvent extends BaseEvent {
@@ -91,6 +116,11 @@ export interface TransportEvent extends BaseEvent {
   duration?: string;
   cost?: number;
   provider?: string;
+  // ── v2 additions ─────────────────────────────────────
+  vehicleType?: string;     // e.g. "4WD SUV", "longtail boat", "classic wooden gozzo"
+  bookingRequired?: boolean;
+  bookingInfo?: string;     // how/where to book
+  licensePlate?: string;    // for rental car records
 }
 
 export interface TrainEvent extends BaseEvent {
@@ -103,6 +133,10 @@ export interface TrainEvent extends BaseEvent {
   arrivalTime: string;
   ticketClass?: string;
   confirmationNumber?: string;
+  // ── v2 additions ─────────────────────────────────────
+  bookingInfo?: string;    // e.g. "Book at raileurope.com — sells out fast in summer"
+  platform?: string;       // departure platform if known
+  seatType?: 'window' | 'aisle' | 'open';
 }
 
 export interface NoteEvent extends BaseEvent {
@@ -140,6 +174,14 @@ export interface Trip {
   events: TripEvent[];
   createdAt: string;
   updatedAt: string;
+  // ── v2 additions ─────────────────────────────────────
+  budgetLevel?: 'budget' | 'mid-range' | 'luxury';
+  // ^ overall cost tier: budget=hostels/street food, mid-range=3★ hotels/casual dining, luxury=5★/fine dining
+  difficultyRating?: 'easy' | 'moderate' | 'challenging' | 'extreme';
+  // ^ easy=city break/beach, moderate=some hiking, challenging=multi-day trek, extreme=expedition
+  highlights?: string[];           // top 4–6 experiences in this trip (for cards/previews)
+  bestSeason?: string;             // e.g. "April–June", "Aug–Sep (avoid monsoon)"
+  totalBudgetEstimateUSD?: number; // estimated total cost per person in USD
 }
 
 // ─── Expenses ───────────────────────────────────────────────────────────────
