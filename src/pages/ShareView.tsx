@@ -21,6 +21,7 @@ import TripHeroMap from '../components/TripHeroMap';
 import MapThumbnail from '../components/MapThumbnail';
 import { EVENT_COLORS } from '../utils/itineraryUtils';
 import { getTravelTime, inferTravelMode, TRAVEL_MODE_EMOJI } from '../utils/mapUtils';
+import { getTemplateById } from '../data';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -43,18 +44,22 @@ function shortDate(iso: string): string {
 export default function ShareView() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
-  const trip = useTripStore(s => s.getTripById(tripId!));
+  const tripFromStore = useTripStore(s => s.getTripById(tripId!));
   const { loadTripById } = useTripStore();
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
+  
+  // Check if this is a template trip first, otherwise load from Supabase
+  const templateTrip = tripId ? getTemplateById(tripId) : null;
+  const trip = templateTrip ?? tripFromStore;
 
-  // Load trip from Supabase if not already in local state (e.g., direct share link)
+  // Load trip from Supabase if not a template and not already in local state
   useEffect(() => {
-    if (tripId && !trip) {
+    if (tripId && !templateTrip && !tripFromStore) {
       loadTripById(tripId);
     }
-  }, [tripId, trip, loadTripById]);
+  }, [tripId, templateTrip, tripFromStore, loadTripById]);
 
   useEffect(() => {
     setCanShare('share' in navigator);
