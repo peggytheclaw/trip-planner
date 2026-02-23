@@ -4,6 +4,7 @@ import { X, Save } from 'lucide-react';
 import { EventType, TripEvent, Traveler } from '../types';
 import { EVENT_ICONS, EVENT_LABELS } from '../utils/itineraryUtils';
 import { toast } from './Toast';
+import ParticipantSelector from './ParticipantSelector';
 
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
@@ -155,65 +156,11 @@ export default function AddEventSheet({
 
         {/* Participants */}
         {travelers.length > 0 && (
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: '#6b7280' }}>
-              Participants
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {/* Everyone button */}
-              <button
-                type="button"
-                onClick={() => update('participants', [])}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all"
-                style={{
-                  border: `2px solid ${!formData.participants || formData.participants.length === 0 ? '#10b981' : '#2a2a2a'}`,
-                  backgroundColor: !formData.participants || formData.participants.length === 0 ? '#10b98120' : '#1e1e1e',
-                  color: !formData.participants || formData.participants.length === 0 ? '#10b981' : '#9ca3af',
-                }}
-              >
-                <span className="text-base">👥</span>
-                Everyone
-              </button>
-
-              {/* Individual travelers */}
-              {travelers.map(traveler => {
-                const isSelected = formData.participants?.includes(traveler.id);
-                const isEveryoneMode = !formData.participants || formData.participants.length === 0;
-                
-                return (
-                  <button
-                    key={traveler.id}
-                    type="button"
-                    onClick={() => {
-                      const current = formData.participants || [];
-                      const updated = isSelected
-                        ? current.filter((id: string) => id !== traveler.id)
-                        : [...current, traveler.id];
-                      update('participants', updated.length === 0 ? [] : updated);
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all"
-                    style={{
-                      border: `2px solid ${isSelected && !isEveryoneMode ? traveler.color : '#2a2a2a'}`,
-                      backgroundColor: isSelected && !isEveryoneMode ? `${traveler.color}20` : '#1e1e1e',
-                      color: isSelected && !isEveryoneMode ? traveler.color : '#9ca3af',
-                    }}
-                    disabled={isEveryoneMode}
-                  >
-                    <span
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                      style={{ backgroundColor: traveler.color }}
-                    >
-                      {traveler.emoji || traveler.name.charAt(0).toUpperCase()}
-                    </span>
-                    {traveler.name}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-xs mt-2" style={{ color: '#6b7280' }}>
-              Select "Everyone" or choose specific travelers for this event
-            </p>
-          </div>
+          <ParticipantSelector
+            travelers={travelers}
+            selectedParticipants={formData.participants || []}
+            onChange={(participants) => update('participants', participants)}
+          />
         )}
 
         {/* Dynamic form fields */}

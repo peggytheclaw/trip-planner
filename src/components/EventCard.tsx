@@ -209,9 +209,7 @@ function FlightCard({ event, color, travelers = [] }: { event: FlightEvent; colo
       <div className="flex items-center justify-between mb-3">
         <TypeBadge type="flight" color={color} />
         <div className="flex items-center gap-2">
-          {travelers.length > 0 && (
-            <ParticipantAvatars participants={event.participants} travelers={travelers} size="sm" />
-          )}
+          <ParticipantAvatars participants={event.participants} travelers={travelers} size="sm" />
           <span className="text-xs font-bold px-2 py-0.5 rounded-full"
             style={{ background: `${color}22`, color }}>
             {event.flightNumber}
