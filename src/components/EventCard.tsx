@@ -8,11 +8,12 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import {
   TripEvent, FlightEvent, HotelEvent, RestaurantEvent,
-  ActivityEvent, TransportEvent, TrainEvent, NoteEvent,
+  ActivityEvent, TransportEvent, TrainEvent, NoteEvent, Traveler,
 } from '../types';
 import { formatTime, formatDate } from '../utils/itineraryUtils';
 import { EVENT_COORDS } from '../utils/eventCoordinates';
 import MiniMap from './MiniMap';
+import ParticipantAvatars from './ParticipantAvatars';
 
 // ─── Color map (accent left border + icon bg tint) ────────────────────────────
 const TYPE_COLOR: Record<string, string> = {
@@ -48,12 +49,13 @@ const cardVariants = {
 
 interface EventCardProps {
   event: TripEvent;
+  travelers?: Traveler[];
   onEdit?: (e: TripEvent) => void;
   onDelete?: (id: string) => void;
   index?: number;
 }
 
-export default function EventCard({ event, onEdit, onDelete, index = 0 }: EventCardProps) {
+export default function EventCard({ event, travelers = [], onEdit, onDelete, index = 0 }: EventCardProps) {
   const color = TYPE_COLOR[event.type] ?? '#6b7280';
   const coords = EVENT_COORDS[event.id];
 
@@ -133,13 +135,13 @@ export default function EventCard({ event, onEdit, onDelete, index = 0 }: EventC
 
       {/* Card content */}
       <div className="p-4">
-        {event.type === 'flight'     && <FlightCard    event={event as FlightEvent}     color={color} />}
-        {event.type === 'hotel'      && <HotelCard     event={event as HotelEvent}      color={color} />}
-        {event.type === 'restaurant' && <RestaurantCard event={event as RestaurantEvent} color={color} />}
-        {event.type === 'activity'   && <ActivityCard  event={event as ActivityEvent}   color={color} />}
-        {event.type === 'transport'  && <TransportCard event={event as TransportEvent}  color={color} />}
-        {event.type === 'train'      && <TrainCard     event={event as TrainEvent}      color={color} />}
-        {event.type === 'note'       && <NoteCard      event={event as NoteEvent}       color={color} />}
+        {event.type === 'flight'     && <FlightCard    event={event as FlightEvent}     color={color} travelers={travelers} />}
+        {event.type === 'hotel'      && <HotelCard     event={event as HotelEvent}      color={color} travelers={travelers} />}
+        {event.type === 'restaurant' && <RestaurantCard event={event as RestaurantEvent} color={color} travelers={travelers} />}
+        {event.type === 'activity'   && <ActivityCard  event={event as ActivityEvent}   color={color} travelers={travelers} />}
+        {event.type === 'transport'  && <TransportCard event={event as TransportEvent}  color={color} travelers={travelers} />}
+        {event.type === 'train'      && <TrainCard     event={event as TrainEvent}      color={color} travelers={travelers} />}
+        {event.type === 'note'       && <NoteCard      event={event as NoteEvent}       color={color} travelers={travelers} />}
 
         {/* Description — shared across all types */}
         {event.description && (
@@ -201,15 +203,20 @@ function DetailChip({ icon, text }: { icon: React.ReactNode; text: string }) {
 }
 
 // ─── Flight ───────────────────────────────────────────────────────────────────
-function FlightCard({ event, color }: { event: FlightEvent; color: string }) {
+function FlightCard({ event, color, travelers = [] }: { event: FlightEvent; color: string; travelers?: Traveler[] }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
         <TypeBadge type="flight" color={color} />
-        <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-          style={{ background: `${color}22`, color }}>
-          {event.flightNumber}
-        </span>
+        <div className="flex items-center gap-2">
+          {travelers.length > 0 && (
+            <ParticipantAvatars participants={event.participants} travelers={travelers} size="sm" />
+          )}
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+            style={{ background: `${color}22`, color }}>
+            {event.flightNumber}
+          </span>
+        </div>
       </div>
       {/* Big route */}
       <div className="flex items-center justify-between">
@@ -257,11 +264,14 @@ function FlightCard({ event, color }: { event: FlightEvent; color: string }) {
 }
 
 // ─── Hotel ────────────────────────────────────────────────────────────────────
-function HotelCard({ event, color }: { event: HotelEvent; color: string }) {
+function HotelCard({ event, color, travelers = [] }: { event: HotelEvent; color: string; travelers?: Traveler[] }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
         <TypeBadge type="hotel" color={color} />
+        {travelers.length > 0 && (
+          <ParticipantAvatars participants={event.participants} travelers={travelers} size="sm" />
+        )}
         {event.isCheckout && (
           <span className="text-[10px] font-semibold" style={{ color: 'var(--text-3)' }}>CHECK-OUT</span>
         )}
@@ -305,11 +315,14 @@ function HotelCard({ event, color }: { event: HotelEvent; color: string }) {
 }
 
 // ─── Restaurant ───────────────────────────────────────────────────────────────
-function RestaurantCard({ event, color }: { event: RestaurantEvent; color: string }) {
+function RestaurantCard({ event, color, travelers = [] }: { event: RestaurantEvent; color: string; travelers?: Traveler[] }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
         <TypeBadge type="restaurant" color={color} />
+        {travelers.length > 0 && (
+          <ParticipantAvatars participants={event.participants} travelers={travelers} size="sm" />
+        )}
         {event.price && <span className="text-sm font-bold" style={{ color: 'var(--text-3)' }}>{event.price}</span>}
       </div>
       <div className="text-lg font-bold leading-tight" style={{ color: 'var(--text)' }}>
@@ -345,7 +358,7 @@ function RestaurantCard({ event, color }: { event: RestaurantEvent; color: strin
 }
 
 // ─── Activity ─────────────────────────────────────────────────────────────────
-function ActivityCard({ event, color }: { event: ActivityEvent; color: string }) {
+function ActivityCard({ event, color, travelers = [] }: { event: ActivityEvent; color: string; travelers?: Traveler[] }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-2">
@@ -355,6 +368,11 @@ function ActivityCard({ event, color }: { event: ActivityEvent; color: string })
             style={{ background: `${color}18`, color: `${color}cc` }}>
             {event.category}
           </span>
+        )}
+        {travelers.length > 0 && (
+          <div className="ml-auto">
+            <ParticipantAvatars participants={event.participants} travelers={travelers} size="sm" />
+          </div>
         )}
       </div>
       <div className="text-base font-bold leading-tight" style={{ color: 'var(--text)' }}>
@@ -380,7 +398,7 @@ function ActivityCard({ event, color }: { event: ActivityEvent; color: string })
 }
 
 // ─── Transport ────────────────────────────────────────────────────────────────
-function TransportCard({ event, color }: { event: TransportEvent; color: string }) {
+function TransportCard({ event, color, travelers = [] }: { event: TransportEvent; color: string; travelers?: Traveler[] }) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-2">
@@ -390,6 +408,11 @@ function TransportCard({ event, color }: { event: TransportEvent; color: string 
           {event.transportType.toUpperCase()}
         </span>
         {event.provider && <span className="text-xs" style={{ color: 'var(--text-3)' }}>{event.provider}</span>}
+        {travelers.length > 0 && (
+          <div className="ml-auto">
+            <ParticipantAvatars participants={event.participants} travelers={travelers} size="sm" />
+          </div>
+        )}
       </div>
       <div className="flex items-center gap-2 font-semibold" style={{ color: 'var(--text)' }}>
         <span>{event.fromLocation}</span>
@@ -406,17 +429,22 @@ function TransportCard({ event, color }: { event: TransportEvent; color: string 
 }
 
 // ─── Train ────────────────────────────────────────────────────────────────────
-function TrainCard({ event, color }: { event: TrainEvent; color: string }) {
+function TrainCard({ event, color, travelers = [] }: { event: TrainEvent; color: string; travelers?: Traveler[] }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
         <TypeBadge type="train" color={color} />
-        {event.trainNumber && (
-          <span className="text-xs px-2 py-0.5 rounded-full font-bold"
-            style={{ background: `${color}22`, color }}>
-            {event.trainNumber}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {travelers.length > 0 && (
+            <ParticipantAvatars participants={event.participants} travelers={travelers} size="sm" />
+          )}
+          {event.trainNumber && (
+            <span className="text-xs px-2 py-0.5 rounded-full font-bold"
+              style={{ background: `${color}22`, color }}>
+              {event.trainNumber}
+            </span>
+          )}
+        </div>
       </div>
       {event.trainName && (
         <div className="text-xs font-semibold mb-2" style={{ color: 'var(--text-2)' }}>{event.trainName}</div>
@@ -448,10 +476,15 @@ function TrainCard({ event, color }: { event: TrainEvent; color: string }) {
 }
 
 // ─── Note ─────────────────────────────────────────────────────────────────────
-function NoteCard({ event, color }: { event: NoteEvent; color: string }) {
+function NoteCard({ event, color, travelers = [] }: { event: NoteEvent; color: string; travelers?: Traveler[] }) {
   return (
     <div>
-      <TypeBadge type="note" color={color} />
+      <div className="flex items-center justify-between mb-2">
+        <TypeBadge type="note" color={color} />
+        {travelers.length > 0 && (
+          <ParticipantAvatars participants={event.participants} travelers={travelers} size="sm" />
+        )}
+      </div>
       {event.title && (
         <div className="font-semibold text-sm mt-2 mb-1" style={{ color: 'var(--text-2)' }}>{event.title}</div>
       )}

@@ -274,6 +274,7 @@ export default function Itinerary() {
                       <div key={event.id}>
                         <EventCard
                           event={event}
+                          travelers={trip.travelers}
                           onEdit={handleEditEvent}
                           onDelete={handleDeleteEvent}
                           index={evtIdx + dayIdx * 5}

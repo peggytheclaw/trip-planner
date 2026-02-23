@@ -24,6 +24,7 @@ export interface BaseEvent {
   createdAt: string;   // ISO datetime
   lat?: number;        // latitude for map display
   lng?: number;        // longitude for map display
+  participants?: string[]; // traveler ids participating in this event (empty/undefined = everyone)
 }
 
 export interface FlightEvent extends BaseEvent {
