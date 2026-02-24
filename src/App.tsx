@@ -79,12 +79,15 @@ export default function App() {
           {/* Public share view — no auth needed */}
           <Route path="/trip/:tripId/share" element={<ShareView />} />
 
+          {/* Trip editing — public (anyone with link can edit) */}
+          <Route path="/trip/:tripId" element={<Itinerary />} />
+          <Route path="/trip/:tripId/event/:eventId" element={<EventDetail />} />
+          <Route path="/trip/:tripId/expenses" element={<Expenses />} />
+          <Route path="/trip/:tripId/settings" element={<TripSettings />} />
+
           {/* Protected app routes */}
           <Route path="/app" element={<RequireAuth><TripList /></RequireAuth>} />
-          <Route path="/trip/:tripId" element={<RequireAuth><Itinerary /></RequireAuth>} />
-          <Route path="/trip/:tripId/event/:eventId" element={<RequireAuth><EventDetail /></RequireAuth>} />
-          <Route path="/trip/:tripId/expenses" element={<RequireAuth><Expenses /></RequireAuth>} />
-          <Route path="/trip/:tripId/settings" element={<RequireAuth><TripSettings /></RequireAuth>} />
+
 
           {/* Legacy redirect */}
           <Route path="/trips" element={<Navigate to="/app" replace />} />

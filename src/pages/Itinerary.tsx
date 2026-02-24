@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft, Share2, DollarSign, Settings, Plus, Check,
-  Copy, X, Eye, Map, ClipboardList, Sparkles, Lightbulb,
+  Copy, X, Eye, Map, ClipboardList, Sparkles, Lightbulb, Users,
 } from 'lucide-react';
 import { AIAgentPanel } from '../components/AIAgentPanel';
 import { useTripStore } from '../store/tripStore';
+import { useAuthStore } from '../store/authStore';
 import { groupEventsByDay, getActiveHotel, detectMealGap } from '../utils/itineraryUtils';
 import { EVENT_COORDS } from '../utils/eventCoordinates';
 import { estimateTravelTime, PRECOMPUTED_TRAVEL } from '../utils/travelTimeUtils';
@@ -22,6 +23,7 @@ import IdeaBankPanel from '../components/IdeaBankPanel';
 export default function Itinerary() {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const {
     getTripById, addEvent, updateEvent, deleteEvent, setCurrentTrip,
     addIdeaToBank, promoteIdeaToItinerary, updateIdea, deleteIdea,
@@ -37,6 +39,10 @@ export default function Itinerary() {
   const [expandedDayMaps, setExpandedDayMaps] = useState<Set<string>>(new Set());
   const [aiOpen, setAiOpen] = useState(false);
   const [isAddingIdea, setIsAddingIdea] = useState(false);
+  const [showGuestBanner, setShowGuestBanner] = useState(true);
+
+  // Check if user is a guest (not logged in)
+  const isGuest = !user;
 
   useEffect(() => {
     if (trip) setCurrentTrip(trip.id);
@@ -46,7 +52,7 @@ export default function Itinerary() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)', color: 'var(--text-2)' }}>
         Trip not found.{' '}
-        <button className="ml-2" style={{ color: 'var(--accent)' }} onClick={() => navigate('/app')}>← Back</button>
+        <button className="ml-2" style={{ color: 'var(--accent)' }} onClick={() => navigate('/discover')}>← Back to Discover</button>
       </div>
     );
   }
@@ -112,6 +118,26 @@ export default function Itinerary() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
 
+      {/* ── GUEST COLLABORATION BANNER ──────────────────────────────────────── */}
+      {isGuest && showGuestBanner && (
+        <motion.div
+          initial={{ y: -100 }}
+          animate={{ y: 0 }}
+          className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-3 text-sm flex items-center gap-3 relative"
+        >
+          <Users size={16} />
+          <span className="flex-1">
+            You're viewing <strong>{trip.name}</strong> in guest mode. Your edits will save for everyone!
+          </span>
+          <button
+            onClick={() => setShowGuestBanner(false)}
+            className="text-white/80 hover:text-white"
+          >
+            <X size={16} />
+          </button>
+        </motion.div>
+      )}
+
       {/* ── HEADER ──────────────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-20" style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
         <div className="max-w-6xl mx-auto">
@@ -124,7 +150,7 @@ export default function Itinerary() {
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-2">
                 <button
-                  onClick={() => navigate('/app')}
+                  onClick={() => navigate('/discover')}
                   className="w-8 h-8 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(255,255,255,0.15)' }}
                 >
@@ -547,7 +573,7 @@ export default function Itinerary() {
                     </span>
                   </div>
                   <p className="text-xs mb-3 leading-relaxed" style={{ color: 'var(--text-3)' }}>
-                    Real-time P2P sync. Co-travelers can add and edit events live.
+                    Anyone with this link can view and edit the trip. Changes save to the cloud — refresh to see updates from others.
                   </p>
                   <div className="flex gap-2">
                     <div className="flex-1 rounded-xl px-3 py-2 text-xs font-mono truncate"
