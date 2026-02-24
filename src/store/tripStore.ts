@@ -89,6 +89,19 @@ interface TripStore {
   updateIdea: (tripId: string, ideaId: string, updates: Partial<TripEvent>) => Promise<void>;
   deleteIdea: (tripId: string, ideaId: string) => Promise<void>;
 
+  // Decision Point actions
+  addDecisionPoint: (tripId: string, params: {
+    date: string;
+    time?: string;
+    question: string;
+    mode?: 'personal' | 'group';
+    options: Array<Omit<import('../types').DecisionOption, 'id'>>;
+  }) => Promise<void>;
+  voteOnDecision: (tripId: string, decisionId: string, optionId: string, userId: string) => Promise<void>;
+  resolveDecision: (tripId: string, decisionId: string, optionId: string) => Promise<void>;
+  setDecisionMode: (tripId: string, decisionId: string, mode: 'personal' | 'group') => Promise<void>;
+  deleteDecision: (tripId: string, decisionId: string) => Promise<void>;
+
   // Traveler actions
   addTraveler: (tripId: string, traveler: Omit<Traveler, 'id'>) => Promise<void>;
   updateTraveler: (tripId: string, travelerId: string, updates: Partial<Traveler>) => Promise<void>;
@@ -393,6 +406,95 @@ export const useTripStore = create<TripStore>((set, get) => ({
           : t
       ),
     }));
+  },
+
+  // ── Decision Points ────────────────────────────────────────────────────────
+
+  addDecisionPoint: async (tripId, params) => {
+    const { date, time, question, mode = 'personal', options } = params;
+
+    // Generate IDs for options and create the decision point
+    const decisionOptions = options.map(opt => ({
+      ...opt,
+      id: crypto.randomUUID(),
+    }));
+
+    const decision: Omit<TripEvent, 'id' | 'createdAt'> = {
+      type: 'decision',
+      date,
+      time,
+      title: question, // Use question as title for consistency
+      question,
+      mode,
+      options: decisionOptions,
+      resolved: false,
+      votes: {},
+    };
+
+    // Add to events like any other event
+    await get().addEvent(tripId, decision);
+  },
+
+  voteOnDecision: async (tripId, decisionId, optionId, userId) => {
+    const trip = get().trips.find(t => t.id === tripId);
+    if (!trip) return;
+
+    const decision = trip.events.find(e => e.id === decisionId && e.type === 'decision');
+    if (!decision || decision.type !== 'decision') return;
+
+    // Validate optionId exists
+    if (!decision.options.some(opt => opt.id === optionId)) {
+      console.error('Invalid option ID');
+      return;
+    }
+
+    // Update votes
+    const updatedVotes = { ...(decision.votes || {}), [userId]: optionId };
+
+    await get().updateEvent(tripId, decisionId, {
+      votes: updatedVotes,
+    } as Partial<TripEvent>);
+  },
+
+  resolveDecision: async (tripId, decisionId, optionId) => {
+    const trip = get().trips.find(t => t.id === tripId);
+    if (!trip) return;
+
+    const decision = trip.events.find(e => e.id === decisionId && e.type === 'decision');
+    if (!decision || decision.type !== 'decision') return;
+
+    const selectedOption = decision.options.find(opt => opt.id === optionId);
+    if (!selectedOption) {
+      console.error('Invalid option ID');
+      return;
+    }
+
+    // Mark decision as resolved
+    await get().updateEvent(tripId, decisionId, {
+      resolved: true,
+      selectedOptionId: optionId,
+    } as Partial<TripEvent>);
+
+    // Insert the selected option's events into the timeline
+    // Place them after the decision point
+    for (const event of selectedOption.events) {
+      const { id, createdAt, ...eventData } = event;
+      await get().addEvent(tripId, {
+        ...eventData,
+        sourceDecisionId: decisionId, // Track which decision created this
+      } as Omit<TripEvent, 'id' | 'createdAt'>);
+    }
+  },
+
+  setDecisionMode: async (tripId, decisionId, mode) => {
+    await get().updateEvent(tripId, decisionId, {
+      mode,
+    } as Partial<TripEvent>);
+  },
+
+  deleteDecision: async (tripId, decisionId) => {
+    // Just use the existing deleteEvent method
+    await get().deleteEvent(tripId, decisionId);
   },
 
   // ── Travelers ──────────────────────────────────────────────────────────────

@@ -7,7 +7,8 @@ export type EventType =
   | 'activity'
   | 'transport'
   | 'train'
-  | 'note';
+  | 'note'
+  | 'decision';
 
 // Base fields shared by all events
 export interface BaseEvent {
@@ -25,6 +26,7 @@ export interface BaseEvent {
   lat?: number;        // latitude for map display
   lng?: number;        // longitude for map display
   participants?: string[]; // traveler ids participating in this event (empty/undefined = everyone)
+  sourceDecisionId?: string; // ID of decision point that created this event (if from resolved decision)
 }
 
 export interface FlightEvent extends BaseEvent {
@@ -145,6 +147,28 @@ export interface NoteEvent extends BaseEvent {
   content: string;
 }
 
+// ─── Decision Points ────────────────────────────────────────────────────────
+
+export interface DecisionOption {
+  id: string;
+  title: string;
+  description?: string;
+  emoji?: string;
+  color?: string;
+  events: TripEvent[];
+}
+
+export interface DecisionPoint extends BaseEvent {
+  type: 'decision';
+  question: string;
+  mode: 'personal' | 'group';
+  options: DecisionOption[];
+  resolved: boolean;
+  selectedOptionId?: string;
+  votes?: Record<string, string>; // userId -> optionId
+  sourceDecisionId?: never; // Decision points cannot be nested
+}
+
 export type TripEvent =
   | FlightEvent
   | HotelEvent
@@ -152,7 +176,8 @@ export type TripEvent =
   | ActivityEvent
   | TransportEvent
   | TrainEvent
-  | NoteEvent;
+  | NoteEvent
+  | DecisionPoint;
 
 // ─── Trip ───────────────────────────────────────────────────────────────────
 
