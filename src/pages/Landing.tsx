@@ -467,7 +467,7 @@ export default function Landing() {
                   </button>
                 ) : (
                   <div className="flex flex-col gap-3">
-                    <div>
+                    <div className="inline-flex rounded-2xl overflow-hidden shadow-lg">
                       <GoogleSignIn redirectTo="/app" size="large" />
                     </div>
                     <div className="flex items-center gap-4 text-xs text-gray-400">
@@ -807,7 +807,9 @@ export default function Landing() {
           ) : (
             <div className="space-y-4">
               <div className="flex justify-center">
-                <GoogleSignIn redirectTo="/app" size="large" theme="filled_black" />
+                <div className="inline-flex rounded-2xl overflow-hidden shadow-lg">
+                  <GoogleSignIn redirectTo="/app" size="large" theme="filled_black" />
+                </div>
               </div>
               <div className="text-gray-500 text-sm">
                 or{' '}
