@@ -393,23 +393,25 @@ export default function Landing() {
 
             {/* Left: copy + waitlist */}
             <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0">
-              {/* Social proof pill */}
-              <motion.div
-                initial={{ opacity: 0, y: -12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-3 py-1.5 mb-6"
-              >
-                <div className="flex -space-x-1">
-                  {['#3B82F6','#10B981','#F97316'].map((c,i) => (
-                    <div key={i} className="w-4 h-4 rounded-full border border-white"
-                      style={{ backgroundColor: c }} />
-                  ))}
-                </div>
-                <span className="text-xs font-semibold text-amber-800">
-                  {getCount().toLocaleString()}+ travelers on waitlist
-                </span>
-              </motion.div>
+              {/* Social proof pill - only show if not logged in */}
+              {!user && (
+                <motion.div
+                  initial={{ opacity: 0, y: -12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-full px-3 py-1.5 mb-6"
+                >
+                  <div className="flex -space-x-1">
+                    {['#3B82F6','#10B981','#F97316'].map((c,i) => (
+                      <div key={i} className="w-4 h-4 rounded-full border border-white"
+                        style={{ backgroundColor: c }} />
+                    ))}
+                  </div>
+                  <span className="text-xs font-semibold text-amber-800">
+                    {getCount().toLocaleString()}+ travelers on waitlist
+                  </span>
+                </motion.div>
+              )}
 
               {/* Headline — pure CSS animation, no Framer Motion opacity on this element
                   (FM opacity creates stacking contexts that let gradient overlays bleed through) */}
