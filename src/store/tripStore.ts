@@ -419,8 +419,8 @@ export const useTripStore = create<TripStore>((set, get) => ({
       id: crypto.randomUUID(),
     }));
 
-    const decision: Omit<TripEvent, 'id' | 'createdAt'> = {
-      type: 'decision',
+    const decision = {
+      type: 'decision' as const,
       date,
       time,
       title: question, // Use question as title for consistency
@@ -431,8 +431,8 @@ export const useTripStore = create<TripStore>((set, get) => ({
       votes: {},
     };
 
-    // Add to events like any other event
-    await get().addEvent(tripId, decision);
+    // Add to events like any other event (cast to proper type for addEvent)
+    await get().addEvent(tripId, decision as Omit<TripEvent, 'id' | 'createdAt'>);
   },
 
   voteOnDecision: async (tripId, decisionId, optionId, userId) => {

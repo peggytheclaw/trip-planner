@@ -11,7 +11,7 @@ import { useAuthStore } from '../store/authStore';
 import { groupEventsByDay, getActiveHotel, detectMealGap } from '../utils/itineraryUtils';
 import { EVENT_COORDS } from '../utils/eventCoordinates';
 import { estimateTravelTime, PRECOMPUTED_TRAVEL } from '../utils/travelTimeUtils';
-import type { TripEvent } from '../types';
+import type { TripEvent, DecisionPoint as DecisionPointType } from '../types';
 import EventCard from '../components/EventCard';
 import AddEventSheet from '../components/AddEventSheet';
 import CollabAvatars from '../components/CollabAvatars';
@@ -19,6 +19,7 @@ import TravelIndicator, { OvernightIndicator, MealNudge } from '../components/Tr
 import { DayMap } from '../components/MiniMap';
 import { toast } from '../components/Toast';
 import IdeaBankPanel from '../components/IdeaBankPanel';
+import { DecisionPointCard, DecisionViewer } from '../components/DecisionPoint';
 
 export default function Itinerary() {
   const { tripId } = useParams<{ tripId: string }>();
@@ -27,6 +28,7 @@ export default function Itinerary() {
   const {
     getTripById, addEvent, updateEvent, deleteEvent, setCurrentTrip,
     addIdeaToBank, promoteIdeaToItinerary, updateIdea, deleteIdea,
+    voteOnDecision, resolveDecision, setDecisionMode,
   } = useTripStore();
 
   const trip = getTripById(tripId!);
@@ -40,9 +42,15 @@ export default function Itinerary() {
   const [aiOpen, setAiOpen] = useState(false);
   const [isAddingIdea, setIsAddingIdea] = useState(false);
   const [showGuestBanner, setShowGuestBanner] = useState(true);
+  const [activeDecisionId, setActiveDecisionId] = useState<string | null>(null);
 
   // Check if user is a guest (not logged in)
   const isGuest = !user;
+
+  // Find active decision if one is selected
+  const activeDecision = activeDecisionId && trip
+    ? (trip.events.find(e => e.id === activeDecisionId && e.type === 'decision') as DecisionPointType | undefined)
+    : undefined;
 
   useEffect(() => {
     if (trip) setCurrentTrip(trip.id);
@@ -73,14 +81,14 @@ export default function Itinerary() {
       // Adding to idea bank
       if (editEvent) {
         // Editing existing idea
-        updateIdea(trip.id, editEvent.id, eventData);
+        updateIdea(trip.id, editEvent.id, eventData as Partial<TripEvent>);
       } else {
         // Adding new idea
         addIdeaToBank(trip.id, eventData);
       }
     } else {
       // Adding to itinerary
-      if (editEvent) updateEvent(trip.id, editEvent.id, eventData);
+      if (editEvent) updateEvent(trip.id, editEvent.id, eventData as Partial<TripEvent>);
       else addEvent(trip.id, eventData);
     }
     setEditEvent(null);
@@ -382,16 +390,27 @@ export default function Itinerary() {
 
                     return (
                       <div key={event.id}>
-                        <EventCard
-                          event={event}
-                          travelers={trip.travelers}
-                          onEdit={handleEditEvent}
-                          onDelete={handleDeleteEvent}
-                          index={evtIdx + dayIdx * 5}
-                        />
+                        {/* Decision Point Card */}
+                        {event.type === 'decision' ? (
+                          <DecisionPointCard
+                            decision={event as DecisionPointType}
+                            onClick={() => setActiveDecisionId(event.id)}
+                            currentUserId={user?.id}
+                            travelers={trip.travelers}
+                          />
+                        ) : (
+                          /* Regular Event Card */
+                          <EventCard
+                            event={event}
+                            travelers={trip.travelers}
+                            onEdit={handleEditEvent}
+                            onDelete={handleDeleteEvent}
+                            index={evtIdx + dayIdx * 5}
+                          />
+                        )}
 
                         {/* Travel / gap indicator */}
-                        {nextEvent && (
+                        {nextEvent && event.type !== 'decision' && (
                           <TravelIndicator
                             estimate={travelEst}
                             onAddEvent={() => handleOpenAdd(event.date)}
@@ -491,6 +510,30 @@ export default function Itinerary() {
         editEvent={editEvent}
         travelers={trip.travelers}
       />
+
+      {/* ── DECISION VIEWER ─────────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {activeDecision && (
+          <DecisionViewer
+            decision={activeDecision}
+            currentUserId={user?.id}
+            travelers={trip.travelers}
+            isOrganizer={true} // TODO: Add proper organizer check
+            onClose={() => setActiveDecisionId(null)}
+            onVote={(optionId) => {
+              if (user?.id) {
+                voteOnDecision(trip.id, activeDecision.id, optionId, user.id);
+              }
+            }}
+            onResolve={(optionId) => {
+              resolveDecision(trip.id, activeDecision.id, optionId);
+            }}
+            onToggleMode={(mode) => {
+              setDecisionMode(trip.id, activeDecision.id, mode);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── SHARE MODAL ─────────────────────────────────────────────────────── */}
       <AnimatePresence>
